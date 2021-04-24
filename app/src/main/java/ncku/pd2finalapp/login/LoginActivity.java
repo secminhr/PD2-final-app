@@ -15,6 +15,7 @@ import com.google.android.material.textfield.TextInputLayout;
 import androidx.appcompat.app.AppCompatActivity;
 import ncku.pd2finalapp.MapActivity;
 import ncku.pd2finalapp.R;
+import ncku.pd2finalapp.ReceiveAndSend.ReceiveInfoFromBack;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -25,6 +26,8 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+
 
         usernameInput = findViewById(R.id.usernameInput);
         passwordInput = findViewById(R.id.passwordInput);
