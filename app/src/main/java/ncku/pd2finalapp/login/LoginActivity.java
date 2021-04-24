@@ -1,7 +1,10 @@
 package ncku.pd2finalapp.login;
 
 import android.content.Intent;
+import android.icu.text.IDNA;
+import android.os.AsyncTask;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -13,9 +16,13 @@ import android.widget.TextView;
 import com.google.android.material.textfield.TextInputLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+
 import ncku.pd2finalapp.MapActivity;
 import ncku.pd2finalapp.R;
-import ncku.pd2finalapp.ReceiveAndSend.ReceiveInfoFromBack;
+import ncku.pd2finalapp.ReceiveAndSend.InfoCheck;
+import ncku.pd2finalapp.ReceiveAndSend.LoginCheck;
+import ncku.pd2finalapp.ReceiveAndSend.LogoutCheck;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -26,8 +33,6 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
-
 
         usernameInput = findViewById(R.id.usernameInput);
         passwordInput = findViewById(R.id.passwordInput);
