@@ -1,7 +1,7 @@
 package ncku.pd2finalapp.login;
 
 interface LoginRepo {
-    void login();
+    void login(String username, String password);
     void setOnSuccessCallback(SuccessCallback callback);
     void setOnFailureCallback(FailureCallback callback);
     LoginRepo instance = new LoginRepoImpl();

@@ -5,6 +5,11 @@ import android.text.TextWatcher;
 
 import com.google.android.material.textfield.TextInputLayout;
 
+/**
+ * A {@link TextWatcher} for {@link TextInputLayout} that will clear the error message when text is editing.
+ *
+ * @author secminhr
+ */
 class ClearErrorOnTextChange implements TextWatcher {
     private final TextInputLayout input;
     public ClearErrorOnTextChange(TextInputLayout input) {

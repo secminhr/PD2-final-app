@@ -3,14 +3,18 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
-        <entry key="app/src/main/res/layout/activity_login.xml" value="0.1743659420289855" />
+        <entry key="../../../../layout/custom_preview.xml" value="0.1" />
+        <entry key="app/src/main/res/layout/activity_login.xml" value="0.10093057184779676" />
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.20170940170940171" />
-        <entry key="app/src/main/res/layout/activity_map.xml" value="0.1743659420289855" />
+        <entry key="app/src/main/res/layout/activity_map.xml" value="0.5" />
+        <entry key="app/src/main/res/layout/activity_register.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/dialog_register.xml" value="0.2190408043381498" />
+        <entry key="app/src/main/res/layout/sample_resgister_dialog.xml" value="0.2111111111111111" />
       </map>
     </option>
   </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="JDK" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" project-jdk-name="JDK" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">

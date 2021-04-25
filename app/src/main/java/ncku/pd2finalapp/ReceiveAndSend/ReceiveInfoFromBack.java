@@ -1,20 +1,24 @@
 package ncku.pd2finalapp.ReceiveAndSend;
-import android.icu.text.IDNA;
 import android.os.AsyncTask;
 import android.util.Log;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.*;
-import java.io.*;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 
-//使用方法：new ReceiveInfoFromBack().execute("URL");僅接受一個url;
-
 import javax.net.ssl.HttpsURLConnection;
+
+//使用方法：new ReceiveInfoFromBack().execute("URL");僅接受一個url;
 
 public class ReceiveInfoFromBack extends AsyncTask<String, Void, String> {
 
     private Exception exception;
-    protected static String network = "https://fuzzy-cheetah-9.loca.lt/";
+    protected static String network = "https://rare-kangaroo-14.loca.lt/";
     protected String Information = "sasader";
     protected String sendtype = null;
     protected String texttype = null;
