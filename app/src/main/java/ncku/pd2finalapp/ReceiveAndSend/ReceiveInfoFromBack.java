@@ -18,7 +18,7 @@ import javax.net.ssl.HttpsURLConnection;
 public class ReceiveInfoFromBack extends AsyncTask<String, Void, String> {
 
     private Exception exception;
-    protected static String network = "https://rare-kangaroo-14.loca.lt/";
+    protected static String network = "https://shaggy-cat-48.loca.lt/";
     protected String Information = "sasader";
     protected String sendtype = null;
     protected String texttype = null;
@@ -38,6 +38,9 @@ public class ReceiveInfoFromBack extends AsyncTask<String, Void, String> {
             //write
             connect.setDoOutput(true);
             connect.setRequestProperty("Content-Type","application/" + texttype);
+            //use this header to bypass the localtunnel page
+            //in situation where backend is not hosted by localtunnel, this header should have no effect
+            connect.setRequestProperty("Bypass-Tunnel-Reminder", "random string");
             OutputStream Stringforoutput = connect.getOutputStream();
             Stringforoutput.write(Information.getBytes(StandardCharsets.UTF_8));
 
