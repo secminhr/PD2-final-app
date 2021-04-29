@@ -54,20 +54,18 @@ public class LoginActivity extends AppCompatActivity {
         if (dialog.hasNoEmptyField()) {
             Network.register(dialog.getUsername(), dialog.getNickname(), dialog.getPassword(), dialog.getFaction())
                     .setOnSuccessCallback(() -> onRegisterSuccess(dialog, alert))
-                    .setOnFailureCallback(e -> runOnUiThread(() -> dialog.showErrorOnUsername(e)))
+                    .setOnFailureCallback(dialog::showErrorOnUsername)
                     .execute();
         }
     }
 
     private void onRegisterSuccess(RegisterDialog dialog, AlertDialog alert) {
-        runOnUiThread(() -> {
-            alert.dismiss();
-            usernameInput.setError(null);
-            passwordInput.setError(null);
-            usernameInput.getEditText().setText(dialog.getUsername());
-            passwordInput.getEditText().setText(dialog.getPassword());
-            login();
-        });
+        alert.dismiss();
+        usernameInput.setError(null);
+        passwordInput.setError(null);
+        usernameInput.getEditText().setText(dialog.getUsername());
+        passwordInput.getEditText().setText(dialog.getPassword());
+        login();
     }
 
     public void onLoginClicked(View clickedButton) {
@@ -96,20 +94,16 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void onLoginSuccess() {
-        runOnUiThread(() -> {
-            setLoginState(LoginState.IDLE);
-            Intent openMapActivity = new Intent(this, MapActivity.class);
-            startActivity(openMapActivity);
-            finish();
-        });
+        setLoginState(LoginState.IDLE);
+        Intent openMapActivity = new Intent(this, MapActivity.class);
+        startActivity(openMapActivity);
+        finish();
     }
 
     private void onLoginFailed(Exception exception) {
-        runOnUiThread(() -> {
-            usernameInput.setError(exception.getMessage());
-            passwordInput.setError(exception.getMessage());
-            setLoginState(LoginState.IDLE);
-        });
+        usernameInput.setError(exception.getMessage());
+        passwordInput.setError(exception.getMessage());
+        setLoginState(LoginState.IDLE);
     }
 
     private boolean isEmpty(TextInputLayout input, String messageWhenEmpty) {

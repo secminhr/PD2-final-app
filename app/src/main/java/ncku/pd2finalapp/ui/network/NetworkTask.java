@@ -1,5 +1,8 @@
 package ncku.pd2finalapp.ui.network;
 
+import android.os.Handler;
+import android.os.Looper;
+
 import java.util.concurrent.Executors;
 
 //The generic here is for task that only receive one type of error.
@@ -23,11 +26,13 @@ public abstract class NetworkTask<E extends Exception> {
     }
 
     protected abstract void task();
+    //We use Looper.getMainLooper to make them run on main (ui) thread.
+    //With this, we can further hide the detail that we're using new thread for each task, and simplify ui codes
     protected void onSuccess() {
-        successCallback.onSuccess();
+        new Handler(Looper.getMainLooper()).post(() -> successCallback.onSuccess());
     }
     protected void onFailure(E exception) {
-        failureCallback.onFailure(exception);
+        new Handler(Looper.getMainLooper()).post(() -> failureCallback.onFailure(exception));
     }
 
     @FunctionalInterface
