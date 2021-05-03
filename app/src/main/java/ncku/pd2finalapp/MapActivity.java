@@ -2,6 +2,9 @@ package ncku.pd2finalapp;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.widget.Toast;
@@ -15,8 +18,10 @@ import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
@@ -27,13 +32,16 @@ import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 
 public class MapActivity extends AppCompatActivity {
 
     private GoogleMap map;
     private Polyline walkedPath;
+    private Marker currentMarker;
     private boolean mapReady = false;
     private boolean viewReady = false;
+    private boolean currentLocated = false;
     private void setMapReady(boolean value) {
         if (value == mapReady) {
             return;
@@ -74,6 +82,7 @@ public class MapActivity extends AppCompatActivity {
                 .findFragmentById(R.id.mapFragment);
         mapFragment.getMapAsync(map -> {
             this.map = map;
+            map.getUiSettings().setMapToolbarEnabled(false);
             setMapReady(true);
         });
         mapFragment.getView().getViewTreeObserver().addOnGlobalLayoutListener(() -> setViewReady(true));
@@ -90,11 +99,23 @@ public class MapActivity extends AppCompatActivity {
             FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(this);
             client.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, null).addOnSuccessListener(location -> {
                 LatLng current = new LatLng(location.getLatitude(), location.getLongitude());
-                map.addMarker(new MarkerOptions().position(current).title("Current position"));
+
+                Drawable drawable = ContextCompat.getDrawable(this, R.drawable.map_marker);
+                Canvas canvas = new Canvas();
+                Bitmap markerBitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+                canvas.setBitmap(markerBitmap);
+                drawable.setBounds(0, 0, drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight());
+                drawable.draw(canvas);
+
+                currentMarker = map.addMarker(new MarkerOptions().position(current).title("Current position").icon(BitmapDescriptorFactory.fromBitmap(markerBitmap)));
                 map.moveCamera(CameraUpdateFactory.newLatLng(current));
                 getSupportActionBar().setTitle("PD2FinalApp");
-                PolylineOptions points = new PolylineOptions().add(current);
+                PolylineOptions points = new PolylineOptions()
+                                                .add(current)
+                                                .color(getResources().getColor(R.color.purple_500, null))
+                                                .width(25);
                 walkedPath = map.addPolyline(points);
+                currentLocated = true;
             });
 
             LocationRequest request = LocationRequest.create()
@@ -105,11 +126,14 @@ public class MapActivity extends AppCompatActivity {
                 @Override
                 public void onLocationResult(@NonNull LocationResult locationResult) {
                     super.onLocationResult(locationResult);
-                    Location last = locationResult.getLastLocation();
-                    LatLng newPoint = new LatLng(last.getLatitude(), last.getLongitude());
-                    List<LatLng> points = walkedPath.getPoints();
-                    points.add(newPoint);
-                    walkedPath.setPoints(points);
+                    if (currentLocated) {
+                        Location last = locationResult.getLastLocation();
+                        LatLng newPoint = new LatLng(last.getLatitude(), last.getLongitude());
+                        List<LatLng> points = walkedPath.getPoints();
+                        points.add(newPoint);
+                        walkedPath.setPoints(points);
+                        currentMarker.setPosition(newPoint);
+                    }
                 }
 
                 @Override
