@@ -35,29 +35,32 @@ import ncku.pd2finalapp.R;
 
 public class MapActivity extends AppCompatActivity implements OnSuccessListener<Location> {
 
+    private static final short MAP_RECEIVED = 1;
+    private static final short MAP_VIEW_RENDERED = 2;
+    private static final short MAP_VIEW_READY = 3;
+
     private GoogleMap map;
     private Polyline walkedPath;
     private Marker currentMarker;
-    private boolean mapReady = false;
-    private boolean viewReady = false;
+    private short mapState = 0;
     private boolean currentLocated = false;
 
-    private void setMapReady(boolean value) {
-        if (value == mapReady) {
+    private void setMapReady() {
+        if ((mapState & MAP_RECEIVED) != 0) {
             return;
         }
-        mapReady = value;
-        if (mapReady && viewReady) {
+        mapState |= MAP_RECEIVED;
+        if (mapState == MAP_VIEW_READY) {
             moveCamera();
             markCurrent();
         }
     }
-    private void setViewReady(boolean value) {
-        if (value == viewReady) {
+    private void setViewRendered() {
+        if ((mapState & MAP_VIEW_RENDERED) != 0) {
             return;
         }
-        viewReady = value;
-        if (mapReady && viewReady) {
+        mapState |= MAP_VIEW_RENDERED;
+        if (mapState == MAP_VIEW_READY) {
             moveCamera();
             markCurrent();
         }
@@ -73,9 +76,9 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
         mapFragment.getMapAsync(map -> {
             this.map = map;
             map.getUiSettings().setMapToolbarEnabled(false);
-            setMapReady(true);
+            setMapReady();
         });
-        mapFragment.getView().getViewTreeObserver().addOnGlobalLayoutListener(() -> setViewReady(true));
+        mapFragment.getView().getViewTreeObserver().addOnGlobalLayoutListener(this::setViewRendered);
     }
 
     private void moveCamera() {
