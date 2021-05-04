@@ -27,7 +27,6 @@ import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.List;
 
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -35,36 +34,14 @@ import ncku.pd2finalapp.R;
 
 public class MapActivity extends AppCompatActivity implements OnSuccessListener<Location> {
 
-    private static final short MAP_RECEIVED = 1;
-    private static final short MAP_VIEW_RENDERED = 2;
-    private static final short MAP_VIEW_READY = 3;
-
     private GoogleMap map;
     private Polyline walkedPath;
     private Marker currentMarker;
-    private short mapState = 0;
-    private boolean currentLocated = false;
 
-    private void setMapReady() {
-        if ((mapState & MAP_RECEIVED) != 0) {
-            return;
-        }
-        mapState |= MAP_RECEIVED;
-        if (mapState == MAP_VIEW_READY) {
-            moveCamera();
-            markCurrent();
-        }
-    }
-    private void setViewRendered() {
-        if ((mapState & MAP_VIEW_RENDERED) != 0) {
-            return;
-        }
-        mapState |= MAP_VIEW_RENDERED;
-        if (mapState == MAP_VIEW_READY) {
-            moveCamera();
-            markCurrent();
-        }
-    }
+    private final MapState mapState = new MapState().onMapViewReady(() -> {
+        moveCamera();
+        markCurrent();
+    });
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -76,9 +53,9 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
         mapFragment.getMapAsync(map -> {
             this.map = map;
             map.getUiSettings().setMapToolbarEnabled(false);
-            setMapReady();
+            mapState.setMapReady();
         });
-        mapFragment.getView().getViewTreeObserver().addOnGlobalLayoutListener(this::setViewRendered);
+        mapFragment.getView().getViewTreeObserver().addOnGlobalLayoutListener(mapState::setViewRendered);
     }
 
     private void moveCamera() {
@@ -87,26 +64,19 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
         map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100));
     }
 
-    private final LocationPermissionHelper permissionHelper = new LocationPermissionHelper(
-        registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
-            if (granted) {
-                markCurrent();
-            } else {
-                Toast.makeText(this, "Sorry, we can't calculate your position if the permission is not granted.", Toast.LENGTH_SHORT).show();
-                finish();
-            }
-        })
-    );
+    private final LocationPermissionHelper permissionHelper = new LocationPermissionHelper(this).onUserDeny(() -> {
+        //when user deny the permission request
+        Toast.makeText(this, "Sorry, we can't calculate your position if the permission is not granted.", Toast.LENGTH_SHORT).show();
+        finish();
+    });
 
     @SuppressLint("MissingPermission")
     private void markCurrent() {
-        if (permissionHelper.hasPermission(this)) {
+        permissionHelper.executeWithPermission(this, () -> {
             getSupportActionBar().setTitle("Loading position...");
             FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(this);
             client.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, null).addOnSuccessListener(this);
-        } else {
-            permissionHelper.requestPermission();
-        }
+        });
     }
 
     //On successfully retrieved user's current location first time
@@ -120,14 +90,13 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
                         .title("Current position")
                         .icon(BitmapDescriptorFactory.fromBitmap(markerBitmap))
         );
-        map.moveCamera(CameraUpdateFactory.newLatLng(current));
+        map.animateCamera(CameraUpdateFactory.newLatLng(current));
         getSupportActionBar().setTitle("PD2FinalApp");
-        PolylineOptions points = new PolylineOptions()
+        PolylineOptions firstPoint = new PolylineOptions()
                 .add(current)
                 .color(getResources().getColor(R.color.purple_500, null))
                 .width(25);
-        walkedPath = map.addPolyline(points);
-        currentLocated = true;
+        walkedPath = map.addPolyline(firstPoint);
         requestLocationUpdate();
     }
 
@@ -145,29 +114,26 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
 
     @SuppressLint("MissingPermission")
     private void requestLocationUpdate() {
-        if (permissionHelper.hasPermission(this)) {
+        permissionHelper.executeWithPermission(this, () -> {
             FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(this);
             LocationRequest request = LocationRequest.create()
                     .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
                     .setInterval(5000);
             client.requestLocationUpdates(request, new CurrentLocationCallback(), getMainLooper());
-        } else {
-            permissionHelper.requestPermission();
-        }
+        });
     }
 
     class CurrentLocationCallback extends LocationCallback {
         @Override
         public void onLocationResult(@NonNull LocationResult locationResult) {
             super.onLocationResult(locationResult);
-            if (currentLocated) {
-                Location last = locationResult.getLastLocation();
-                LatLng newPoint = new LatLng(last.getLatitude(), last.getLongitude());
-                List<LatLng> points = walkedPath.getPoints();
-                points.add(newPoint);
-                walkedPath.setPoints(points);
-                currentMarker.setPosition(newPoint);
-            }
+            Location last = locationResult.getLastLocation();
+            LatLng newPoint = new LatLng(last.getLatitude(), last.getLongitude());
+
+            List<LatLng> points = walkedPath.getPoints();
+            points.add(newPoint);
+            walkedPath.setPoints(points);
+            currentMarker.setPosition(newPoint);
         }
     }
 }
