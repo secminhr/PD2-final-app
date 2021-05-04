@@ -17,12 +17,14 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.RoundCap;
 import com.google.android.gms.tasks.OnSuccessListener;
 
 import java.util.List;
@@ -31,12 +33,15 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import ncku.pd2finalapp.R;
+import ncku.pd2finalapp.ui.network.Network;
+import ncku.pd2finalapp.ui.network.WSClient;
 
 public class MapActivity extends AppCompatActivity implements OnSuccessListener<Location> {
 
     private GoogleMap map;
     private Polyline walkedPath;
     private Marker currentMarker;
+    private WSClient locationAsyncClient;
 
     private final MapState mapState = new MapState().onMapViewReady(() -> {
         moveCamera();
@@ -56,6 +61,14 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
             mapState.setMapReady();
         });
         mapFragment.getView().getViewTreeObserver().addOnGlobalLayoutListener(mapState::setViewRendered);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (locationAsyncClient != null) {
+            locationAsyncClient.close();
+        }
     }
 
     private void moveCamera() {
@@ -95,8 +108,15 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
         PolylineOptions firstPoint = new PolylineOptions()
                 .add(current)
                 .color(getResources().getColor(R.color.purple_500, null))
+                .startCap(new RoundCap())
+                .endCap(new RoundCap())
+                .jointType(JointType.ROUND)
                 .width(25);
         walkedPath = map.addPolyline(firstPoint);
+        locationAsyncClient = Network.createWebSocketConnection();
+        if (locationAsyncClient != null) {
+            locationAsyncClient.send(current);
+        }
         requestLocationUpdate();
     }
 
@@ -132,6 +152,7 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
 
             List<LatLng> points = walkedPath.getPoints();
             points.add(newPoint);
+            locationAsyncClient.send(newPoint);
             walkedPath.setPoints(points);
             currentMarker.setPosition(newPoint);
         }
