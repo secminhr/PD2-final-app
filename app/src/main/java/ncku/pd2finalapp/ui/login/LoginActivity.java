@@ -12,7 +12,7 @@ import android.widget.TextView;
 import com.google.android.material.textfield.TextInputLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
-import ncku.pd2finalapp.MapActivity;
+import ncku.pd2finalapp.ui.map.MapActivity;
 import ncku.pd2finalapp.R;
 import ncku.pd2finalapp.ui.network.Network;
 
