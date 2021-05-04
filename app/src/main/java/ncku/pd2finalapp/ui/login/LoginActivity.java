@@ -19,6 +19,7 @@ import ncku.pd2finalapp.ui.network.Network;
 public class LoginActivity extends AppCompatActivity {
 
     private TextInputLayout usernameInput, passwordInput;
+    public static final String USERNAME_EXTRA = "username";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,6 +97,7 @@ public class LoginActivity extends AppCompatActivity {
     private void onLoginSuccess() {
         setLoginState(LoginState.IDLE);
         Intent openMapActivity = new Intent(this, MapActivity.class);
+        openMapActivity.putExtra(USERNAME_EXTRA, getStringFromInput(usernameInput));
         startActivity(openMapActivity);
         finish();
     }

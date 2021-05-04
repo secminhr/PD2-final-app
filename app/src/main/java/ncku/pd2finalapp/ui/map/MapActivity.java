@@ -6,6 +6,7 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -26,6 +27,7 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
 import java.util.List;
 
@@ -33,6 +35,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import ncku.pd2finalapp.R;
+import ncku.pd2finalapp.ui.login.LoginActivity;
 import ncku.pd2finalapp.ui.network.Network;
 import ncku.pd2finalapp.ui.network.WSClient;
 
@@ -42,6 +45,17 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
     private Polyline walkedPath;
     private Marker currentMarker;
     private WSClient locationAsyncClient;
+    private String username;
+    private boolean isRecording = false;
+    private void setRecording(boolean value) {
+        isRecording = value;
+        ExtendedFloatingActionButton button = findViewById(R.id.fab);
+        if (isRecording) {
+            button.setOnClickListener(this::onStopRecordingClicked);
+        } else {
+            button.setOnClickListener(this::onStartRecordingClicked);
+        }
+    }
 
     private final MapState mapState = new MapState().onMapViewReady(() -> {
         moveCamera();
@@ -52,7 +66,7 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map);
-
+        username = getIntent().getStringExtra(LoginActivity.USERNAME_EXTRA);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.mapFragment);
         mapFragment.getMapAsync(map -> {
@@ -105,18 +119,6 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
         );
         map.animateCamera(CameraUpdateFactory.newLatLng(current));
         getSupportActionBar().setTitle("PD2FinalApp");
-        PolylineOptions firstPoint = new PolylineOptions()
-                .add(current)
-                .color(getResources().getColor(R.color.purple_500, null))
-                .startCap(new RoundCap())
-                .endCap(new RoundCap())
-                .jointType(JointType.ROUND)
-                .width(25);
-        walkedPath = map.addPolyline(firstPoint);
-        locationAsyncClient = Network.createWebSocketConnection();
-        if (locationAsyncClient != null) {
-            locationAsyncClient.send(current);
-        }
         requestLocationUpdate();
     }
 
@@ -132,6 +134,43 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
         return markerBitmap;
     }
 
+    public void onStartRecordingClicked(View v) {
+        ExtendedFloatingActionButton button = (ExtendedFloatingActionButton) v;
+        button.setText("Connecting...");
+        button.setIconResource(R.drawable.ic_baseline_connecting_24);
+        LatLng current = currentMarker.getPosition();
+        locationAsyncClient = Network.createWebSocketConnection(username);
+
+        button.setIconResource(R.drawable.ic_baseline_stop_24);
+        button.shrink();
+        if (locationAsyncClient != null) {
+            locationAsyncClient.send(current);
+        }
+
+        PolylineOptions firstPoint = new PolylineOptions()
+                .add(current)
+                .color(getResources().getColor(R.color.purple_500, null))
+                .startCap(new RoundCap())
+                .endCap(new RoundCap())
+                .jointType(JointType.ROUND)
+                .width(25);
+
+        walkedPath = map.addPolyline(firstPoint);
+        setRecording(true);
+    }
+
+    public void onStopRecordingClicked(View v) {
+        ExtendedFloatingActionButton button = (ExtendedFloatingActionButton) v;
+        button.setText("Start Recording");
+        button.setIconResource(R.drawable.ic_baseline_record_24);
+        button.extend();
+        if (locationAsyncClient != null) {
+            locationAsyncClient.close();
+            locationAsyncClient = null;
+        }
+        setRecording(false);
+    }
+
     @SuppressLint("MissingPermission")
     private void requestLocationUpdate() {
         permissionHelper.executeWithPermission(this, () -> {
@@ -143,18 +182,22 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
         });
     }
 
-    class CurrentLocationCallback extends LocationCallback {
+    private class CurrentLocationCallback extends LocationCallback {
         @Override
         public void onLocationResult(@NonNull LocationResult locationResult) {
             super.onLocationResult(locationResult);
             Location last = locationResult.getLastLocation();
             LatLng newPoint = new LatLng(last.getLatitude(), last.getLongitude());
-
-            List<LatLng> points = walkedPath.getPoints();
-            points.add(newPoint);
-            locationAsyncClient.send(newPoint);
-            walkedPath.setPoints(points);
             currentMarker.setPosition(newPoint);
+
+            if (isRecording) {
+                List<LatLng> points = walkedPath.getPoints();
+                points.add(newPoint);
+                if (locationAsyncClient != null) {
+                    locationAsyncClient.send(newPoint);
+                }
+                walkedPath.setPoints(points);
+            }
         }
     }
 }

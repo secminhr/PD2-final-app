@@ -13,11 +13,11 @@ public class Network {
         return new RegisterTask(username, nickname, password, faction);
     }
 
-    public static WSClient createWebSocketConnection() {
+    public static WSClient createWebSocketConnection(String username) {
         String uri = "";
         try {
             URI server = new URI(uri);
-            WSClient client = new WSClient(server);
+            WSClient client = new WSClient(server, username);
             client.connectBlocking();
             return client;
         } catch (URISyntaxException e) {

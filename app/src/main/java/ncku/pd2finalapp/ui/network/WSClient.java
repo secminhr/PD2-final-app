@@ -12,14 +12,20 @@ import java.net.URI;
 public class WSClient {
 
     private Client client;
-    public WSClient(URI uri) {
+    private String username;
+    public WSClient(URI uri, String username) {
         client = new Client(uri);
+        this.username = username;
     }
 
     public void send(LatLng latLng) {
         if (client.isOpen()) {
-            client.send(latLng.toString());
+            client.send(toWSFormat(latLng));
         }
+    }
+
+    private String toWSFormat(LatLng latlng) {
+        return "{\"id\":" + username + ",\"longitude\":" + latlng.longitude + ",\"latitude\":" + latlng.latitude + "}";
     }
 
     public boolean connectBlocking() throws InterruptedException {
