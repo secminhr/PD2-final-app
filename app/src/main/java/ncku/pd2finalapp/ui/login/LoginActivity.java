@@ -3,6 +3,7 @@ package ncku.pd2finalapp.ui.login;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -12,8 +13,8 @@ import android.widget.TextView;
 import com.google.android.material.textfield.TextInputLayout;
 
 import androidx.appcompat.app.AppCompatActivity;
-import ncku.pd2finalapp.ui.map.MapActivity;
 import ncku.pd2finalapp.R;
+import ncku.pd2finalapp.ui.map.MapActivity;
 import ncku.pd2finalapp.ui.network.Network;
 
 public class LoginActivity extends AppCompatActivity {
@@ -54,7 +55,7 @@ public class LoginActivity extends AppCompatActivity {
     private void register(RegisterDialog dialog, AlertDialog alert) {
         if (dialog.hasNoEmptyField()) {
             Network.register(dialog.getUsername(), dialog.getNickname(), dialog.getPassword(), dialog.getFaction())
-                    .setOnSuccessCallback(() -> onRegisterSuccess(dialog, alert))
+                    .setOnSuccessCallback((result) -> onRegisterSuccess(dialog, alert)) //result is always null
                     .setOnFailureCallback(dialog::showErrorOnUsername)
                     .execute();
         }
@@ -89,8 +90,14 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
         Network.login(getStringFromInput(usernameInput), getStringFromInput(passwordInput))
-                .setOnSuccessCallback(this::onLoginSuccess)
+                .setOnSuccessCallback((result) -> onLoginSuccess()) //result is always null,
                 .setOnFailureCallback(this::onLoginFailed)
+                .execute();
+
+        Network.getUserInfo()
+                .setOnSuccessCallback((info) -> {
+                    Log.e("Login", "in info");
+                })
                 .execute();
     }
 

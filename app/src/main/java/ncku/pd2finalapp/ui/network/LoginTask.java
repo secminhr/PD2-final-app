@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 
 import ncku.pd2finalapp.ReceiveAndSend.LoginCheck;
 
-public class LoginTask extends NetworkTask<LoginTask.LoginFailedException> {
+public class LoginTask extends NetworkTask<Void, LoginTask.LoginFailedException> {
 
     private final String username;
     private final String password;
@@ -26,7 +26,7 @@ public class LoginTask extends NetworkTask<LoginTask.LoginFailedException> {
         JsonObject json = gson.fromJson(response, JsonObject.class);
         boolean succeed = json.getAsJsonPrimitive("success").getAsBoolean();
         if (succeed) {
-            onSuccess();
+            onSuccess(null);
         } else {
             onFailure(new LoginFailedException());
         }

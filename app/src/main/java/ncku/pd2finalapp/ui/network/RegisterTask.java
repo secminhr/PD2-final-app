@@ -5,7 +5,7 @@ import com.google.gson.JsonObject;
 
 import ncku.pd2finalapp.ReceiveAndSend.RegisterCheck;
 
-public class RegisterTask extends NetworkTask<RegisterTask.UsernameExistsException> {
+public class RegisterTask extends NetworkTask<Void, RegisterTask.UsernameExistsException> {
 
     private final String username;
     private final String nickname;
@@ -30,7 +30,7 @@ public class RegisterTask extends NetworkTask<RegisterTask.UsernameExistsExcepti
         JsonObject json = gson.fromJson(response, JsonObject.class);
         boolean succeed = json.getAsJsonPrimitive("success").getAsBoolean();
         if (succeed) {
-            onSuccess();
+            onSuccess(null);
         } else {
             //This should be the only error that we'll receive
             //since we've checked that all field are not empty before sending
