@@ -1,9 +1,9 @@
-package ncku.pd2finalapp.ui.network;
+package ncku.pd2finalapp.ui.network.tasks;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-import ncku.pd2finalapp.ReceiveAndSend.RegisterCheck;
+import ncku.pd2finalapp.ui.network.repositories.TaskRepository;
 
 public class RegisterTask extends NetworkTask<Void, RegisterTask.UsernameExistsException> {
 
@@ -12,7 +12,7 @@ public class RegisterTask extends NetworkTask<Void, RegisterTask.UsernameExistsE
     private final String password;
     private final String faction;
 
-    RegisterTask(String username, String nickname, String password, String faction) {
+    public RegisterTask(String username, String nickname, String password, String faction) {
         this.username = username;
         this.nickname = nickname;
         this.password = password;
@@ -21,7 +21,7 @@ public class RegisterTask extends NetworkTask<Void, RegisterTask.UsernameExistsE
 
     @Override
     protected void task() {
-        String response = new RegisterCheck().RegisterCheckData(username, nickname, password, faction);
+        String response = TaskRepository.current.registerCheckData(username, nickname, password, faction);
         onReceive(response);
     }
 

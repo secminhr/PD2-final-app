@@ -1,23 +1,23 @@
-package ncku.pd2finalapp.ui.network;
+package ncku.pd2finalapp.ui.network.tasks;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-import ncku.pd2finalapp.ReceiveAndSend.LoginCheck;
+import ncku.pd2finalapp.ui.network.repositories.TaskRepository;
 
 public class LoginTask extends NetworkTask<Void, LoginTask.LoginFailedException> {
 
     private final String username;
     private final String password;
 
-    LoginTask(String username, String password) {
+    public LoginTask(String username, String password) {
         this.username = username;
         this.password = password;
     }
 
     @Override
     protected void task() {
-        String response = new LoginCheck().LoginCheckData(username, password);
+        String response = TaskRepository.current.loginCheckData(username, password);
         onReceive(response);
     }
 

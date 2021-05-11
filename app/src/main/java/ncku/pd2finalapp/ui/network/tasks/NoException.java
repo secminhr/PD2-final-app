@@ -1,6 +1,6 @@
-package ncku.pd2finalapp.ui.network;
+package ncku.pd2finalapp.ui.network.tasks;
 
-class NoException extends Exception {
+public class NoException extends Exception {
     public NoException() {
         super("This exception should never happen");
     }

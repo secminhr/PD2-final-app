@@ -1,25 +1,17 @@
-package ncku.pd2finalapp.ui.network;
+package ncku.pd2finalapp.ui.network.tasks;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import ncku.pd2finalapp.ui.info.UserInfo;
+import ncku.pd2finalapp.ui.network.repositories.TaskRepository;
 
-class InfoTask extends NetworkTask<UserInfo, NoException> {
+public class InfoTask extends NetworkTask<UserInfo, NoException> {
 
     @Override
     protected void task() {
-        //String response = new InfoCheck().InfoCheckData();
-        String response = "{\n" +
-                "    \"username\": \"sssss\",\n" +
-                "    \"status\": {\n" +
-                "        \"exp\": 0,\n" +
-                "        \"level\": 0,\n" +
-                "        \"nickname\": \"s1s\",\n" +
-                "        \"faction\": \"A\"\n" +
-                "    }\n" +
-                "}";
+        String response = TaskRepository.current.infoCheckData();
         onReceive(response);
     }
 

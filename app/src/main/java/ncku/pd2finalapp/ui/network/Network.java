@@ -4,6 +4,11 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import ncku.pd2finalapp.ui.info.UserInfo;
+import ncku.pd2finalapp.ui.network.tasks.InfoTask;
+import ncku.pd2finalapp.ui.network.tasks.LoginTask;
+import ncku.pd2finalapp.ui.network.tasks.NetworkTask;
+import ncku.pd2finalapp.ui.network.tasks.NoException;
+import ncku.pd2finalapp.ui.network.tasks.RegisterTask;
 
 //Provide an interface to interact with networking part in a non-blocking way
 public class Network {
