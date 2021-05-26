@@ -3,7 +3,6 @@ package ncku.pd2finalapp.ui.login;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
@@ -12,9 +11,14 @@ import android.widget.TextView;
 
 import com.google.android.material.textfield.TextInputLayout;
 
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
+
 import androidx.appcompat.app.AppCompatActivity;
 import ncku.pd2finalapp.R;
 import ncku.pd2finalapp.ui.map.MapActivity;
+import ncku.pd2finalapp.ui.network.CookieStore;
 import ncku.pd2finalapp.ui.network.Network;
 
 public class LoginActivity extends AppCompatActivity {
@@ -26,6 +30,9 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        //setup cookie store at start
+        CookieHandler.setDefault(new CookieManager(new CookieStore(this), CookiePolicy.ACCEPT_ORIGINAL_SERVER));
 
         usernameInput = findViewById(R.id.usernameInput);
         passwordInput = findViewById(R.id.passwordInput);
@@ -92,12 +99,6 @@ public class LoginActivity extends AppCompatActivity {
         Network.login(getStringFromInput(usernameInput), getStringFromInput(passwordInput))
                 .setOnSuccessCallback((result) -> onLoginSuccess()) //result is always null,
                 .setOnFailureCallback(this::onLoginFailed)
-                .execute();
-
-        Network.getUserInfo()
-                .setOnSuccessCallback((info) -> {
-                    Log.e("Login", "in info");
-                })
                 .execute();
     }
 
