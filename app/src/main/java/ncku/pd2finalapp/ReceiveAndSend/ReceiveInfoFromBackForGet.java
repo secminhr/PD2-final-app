@@ -11,11 +11,12 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 
+
 import javax.net.ssl.HttpsURLConnection;
 
 //使用方法：new ReceiveInfoFromBack().execute("URL");僅接受一個url;
 
-public class ReceiveInfoFromBack extends AsyncTask<String, Void, String> {
+public class ReceiveInfoFromBackForGet extends AsyncTask<String, Void, String> {
 
     private Exception exception;
     protected static String network = "https://cold-vampirebat-37.loca.lt/";
@@ -25,29 +26,29 @@ public class ReceiveInfoFromBack extends AsyncTask<String, Void, String> {
 
 
 
+
     protected String doInBackground(String... urls) {
         HttpURLConnection connection = null;
         try {
             URL url = new URL(urls[0]);
             URLConnection urlConnection = url.openConnection();
             HttpsURLConnection connect = (HttpsURLConnection) urlConnection;
-            connect.setRequestMethod(sendtype);
-
-
-
-            //write
-            connect.setDoOutput(true);
-            connect.setRequestProperty("Content-Type","application/" + texttype);
+            if (texttype != null) {
+                connect.setRequestProperty("Content-Type", "application/" + texttype);
+            }
             //use this header to bypass the localtunnel page
             //in situation where backend is not hosted by localtunnel, this header should have no effect
             connect.setRequestProperty("Bypass-Tunnel-Reminder", "random string");
-            OutputStream Stringforoutput = connect.getOutputStream();
-            Stringforoutput.write(Information.getBytes(StandardCharsets.UTF_8));
+           // OutputStream Stringforoutput = connect.getOutputStream();
+            //Stringforoutput.write(Information.getBytes(StandardCharsets.UTF_8));
+
+
+
+
 
             //get code
             int response = connect.getResponseCode();
             String c = String.valueOf(response);
-            Log.e("URLTRY2", "staticcode" + c);
 
 
             //receive
@@ -60,7 +61,6 @@ public class ReceiveInfoFromBack extends AsyncTask<String, Void, String> {
                 while ((current = in.readLine()) != null) {
                     urlString += current;
                 }
-                Log.e("URLTRY2", urlString);
                 return urlString;
             }else {
                 BufferedReader in = new BufferedReader(
@@ -71,7 +71,7 @@ public class ReceiveInfoFromBack extends AsyncTask<String, Void, String> {
                 while ((current = in.readLine()) != null) {
                     urlString += current;
                 }
-                Log.e("URLTRY2", urlString);
+
                 return urlString;
             }
 
@@ -83,6 +83,8 @@ public class ReceiveInfoFromBack extends AsyncTask<String, Void, String> {
         return null;
 
     }
+
+
 
 
     protected void onPostExecute(Void feed) {

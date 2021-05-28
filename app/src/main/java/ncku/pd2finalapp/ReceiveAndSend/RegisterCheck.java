@@ -7,10 +7,10 @@ import java.util.concurrent.ExecutionException;
 
 public class RegisterCheck extends ReceiveInfoFromBack {
 
-    public String RegisterCheckData( String username, String nickname, String password, String faction) {
-        this.sendtype = "POST";
-        this.texttype = "json";
-        this.Information = "{\n" +
+    public String RegisterCheckData(String username, String nickname, String password, String faction) {
+        sendtype = "POST";
+        texttype = "json";
+        Information = "{\n" +
                 "  \"username\": \"" + username + "\",\n" +
                 "  \"nickname\": \"" + nickname + "\",\n" +
                 "  \"password\": \"" + password + "\",\n" +

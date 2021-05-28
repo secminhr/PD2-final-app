@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#2B0000"
+    tools:context=".ui.selfinfo.selfinformation">
+
+    <TextView
+        android:id="@+id/Name"
+        android:layout_width="104dp"
+        android:layout_height="36dp"
+
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="24dp"
+        android:autoText="false"
+        android:background="@drawable/shape_info_texttitle"
+        android:text="username："
+        android:textAlignment="center"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/buttontomap" />
+
+    <TextView
+        android:id="@+id/namestore"
+        android:layout_width="212dp"
+        android:layout_height="35dp"
+        android:autoText="false"
+        android:background="@drawable/shape_info_textfield"
+        android:clickable="false"
+        android:onClick="showname"
+        android:textAlignment="center"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/Name"
+        app:layout_constraintEnd_toEndOf="@+id/levelstore"
+        app:layout_constraintStart_toEndOf="@+id/Name"
+        app:layout_constraintTop_toTopOf="@+id/Name"
+        tools:ignore="OnClick" />
+
+    <TextView
+        android:id="@+id/textView4"
+        android:layout_width="105dp"
+        android:layout_height="35dp"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/shape_info_texttitle"
+        android:text="LEVEL："
+        android:textAlignment="center"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/Name" />
+
+    <TextView
+        android:id="@+id/levelstore"
+        android:layout_width="212dp"
+        android:layout_height="36dp"
+        android:background="@drawable/shape_info_textfield"
+        android:onClick="showlevel"
+        android:textAlignment="center"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/textView4"
+        app:layout_constraintEnd_toEndOf="@+id/nicknamestore"
+        app:layout_constraintStart_toEndOf="@+id/textView4"
+        app:layout_constraintTop_toTopOf="@+id/textView4"
+        app:layout_constraintVertical_bias="0.0"
+        tools:ignore="OnClick" />
+
+    <TextView
+        android:id="@+id/textView6"
+        android:layout_width="150dp"
+        android:layout_height="33dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/shape_info_texttitle"
+        android:text="UPGRADE ："
+        android:textAlignment="center"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView10" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/valueoffirstplus"
+        android:layout_width="60dp"
+        android:layout_height="37dp"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/ic_changetoinfo"
+        android:onClick="upgrade"
+        android:text="+"
+        android:textSize="16sp"
+        app:layout_constraintEnd_toEndOf="@+id/valueoffirst"
+        app:layout_constraintStart_toStartOf="@+id/valueoffirst"
+        app:layout_constraintTop_toBottomOf="@+id/valueoffirst" />
+
+    <TextView
+        android:id="@+id/valueoffirst"
+        android:layout_width="62dp"
+        android:layout_height="18dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/shape_info_texttitle"
+        android:onClick="showupgradefirst"
+        android:textAlignment="center"
+        app:layout_constraintEnd_toEndOf="@+id/textView7"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/textView7"
+        app:layout_constraintTop_toBottomOf="@+id/textView7"
+        tools:ignore="OnClick" />
+
+    <TextView
+        android:id="@+id/textView7"
+        android:layout_width="62dp"
+        android:layout_height="56dp"
+        android:layout_marginStart="32dp"
+        android:layout_marginTop="20dp"
+        android:background="@drawable/shape_info_texttitle"
+        android:text="First"
+        android:textAlignment="center"
+        android:textSize="20sp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView6" />
+
+    <androidx.appcompat.widget.AppCompatButton
+        android:id="@+id/buttontomap"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="16dp"
+        android:background="@drawable/ic_info"
+        android:onClick="ChangeToMap"
+        android:text="MAP"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/textView2"
+        android:layout_width="110dp"
+        android:layout_height="31dp"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/shape_info_texttitle"
+        android:text="nickname"
+        android:textAlignment="center"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView4" />
+
+    <TextView
+        android:id="@+id/textView8"
+        android:layout_width="110dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/shape_info_texttitle"
+        android:text="status"
+        android:textAlignment="center"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView2" />
+
+    <TextView
+        android:id="@+id/textView9"
+        android:layout_width="114dp"
+        android:layout_height="35dp"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/shape_info_texttitle"
+        android:text="exp"
+        android:textAlignment="center"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView8" />
+
+    <TextView
+        android:id="@+id/textView10"
+        android:layout_width="120dp"
+        android:layout_height="29dp"
+        android:layout_marginStart="48dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/shape_info_texttitle"
+        android:text="faction"
+        android:textAlignment="center"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView9" />
+
+    <TextView
+        android:id="@+id/nicknamestore"
+        android:layout_width="205dp"
+        android:layout_height="31dp"
+
+        android:background="@drawable/shape_info_textfield"
+        android:onClick="shownickname"
+        android:textAlignment="center"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/textView2"
+        app:layout_constraintEnd_toEndOf="@+id/statusstore"
+        app:layout_constraintStart_toEndOf="@+id/textView2"
+        app:layout_constraintTop_toTopOf="@+id/textView2"
+        tools:ignore="OnClick" />
+
+    <TextView
+        android:id="@+id/statusstore"
+        android:layout_width="203dp"
+        android:layout_height="30dp"
+        android:background="@drawable/shape_info_textfield"
+        android:onClick="showstatus"
+        android:textAlignment="center"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/textView8"
+        app:layout_constraintEnd_toEndOf="@+id/expstore"
+        app:layout_constraintStart_toEndOf="@+id/textView8"
+        app:layout_constraintTop_toTopOf="@+id/textView8"
+        tools:ignore="OnClick" />
+
+    <TextView
+        android:id="@+id/expstore"
+        android:layout_width="195dp"
+        android:layout_height="36dp"
+        android:background="@drawable/shape_info_textfield"
+        android:onClick="showexp"
+        android:textAlignment="center"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/textView9"
+        app:layout_constraintEnd_toEndOf="@+id/factionsotre"
+        app:layout_constraintStart_toEndOf="@+id/textView9"
+        app:layout_constraintTop_toTopOf="@+id/textView9"
+        tools:ignore="OnClick" />
+
+    <TextView
+        android:id="@+id/factionsotre"
+        android:layout_width="189dp"
+        android:layout_height="29dp"
+        android:background="@drawable/shape_info_textfield"
+        android:onClick="showfaction"
+        android:textAlignment="center"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="@+id/textView10"
+        app:layout_constraintStart_toEndOf="@+id/textView10"
+        app:layout_constraintTop_toTopOf="@+id/textView10"
+        tools:ignore="OnClick" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

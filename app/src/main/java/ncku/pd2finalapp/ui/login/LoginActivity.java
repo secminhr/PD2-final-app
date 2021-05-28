@@ -33,7 +33,6 @@ public class LoginActivity extends AppCompatActivity {
 
         //setup cookie store at start
         CookieHandler.setDefault(new CookieManager(new CookieStore(this), CookiePolicy.ACCEPT_ORIGINAL_SERVER));
-
         usernameInput = findViewById(R.id.usernameInput);
         passwordInput = findViewById(R.id.passwordInput);
 
