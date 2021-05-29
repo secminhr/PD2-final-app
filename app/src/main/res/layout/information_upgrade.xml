@@ -27,6 +27,7 @@
         android:id="@+id/namestore"
         android:layout_width="212dp"
         android:layout_height="35dp"
+        android:layout_marginEnd="48dp"
         android:autoText="false"
         android:background="@drawable/shape_info_textfield"
         android:clickable="false"
@@ -35,7 +36,7 @@
         android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@+id/Name"
-        app:layout_constraintEnd_toEndOf="@+id/levelstore"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/Name"
         app:layout_constraintTop_toTopOf="@+id/Name"
         tools:ignore="OnClick" />
@@ -64,7 +65,7 @@
         android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@+id/textView4"
-        app:layout_constraintEnd_toEndOf="@+id/nicknamestore"
+        app:layout_constraintEnd_toEndOf="@+id/namestore"
         app:layout_constraintStart_toEndOf="@+id/textView4"
         app:layout_constraintTop_toTopOf="@+id/textView4"
         app:layout_constraintVertical_bias="0.0"
@@ -203,7 +204,7 @@
         android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@+id/textView2"
-        app:layout_constraintEnd_toEndOf="@+id/statusstore"
+        app:layout_constraintEnd_toEndOf="@+id/levelstore"
         app:layout_constraintStart_toEndOf="@+id/textView2"
         app:layout_constraintTop_toTopOf="@+id/textView2"
         tools:ignore="OnClick" />
@@ -218,7 +219,7 @@
         android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@+id/textView8"
-        app:layout_constraintEnd_toEndOf="@+id/expstore"
+        app:layout_constraintEnd_toEndOf="@+id/nicknamestore"
         app:layout_constraintStart_toEndOf="@+id/textView8"
         app:layout_constraintTop_toTopOf="@+id/textView8"
         tools:ignore="OnClick" />
@@ -233,7 +234,7 @@
         android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@+id/textView9"
-        app:layout_constraintEnd_toEndOf="@+id/factionsotre"
+        app:layout_constraintEnd_toEndOf="@+id/statusstore"
         app:layout_constraintStart_toEndOf="@+id/textView9"
         app:layout_constraintTop_toTopOf="@+id/textView9"
         tools:ignore="OnClick" />
@@ -248,6 +249,7 @@
         android:textSize="16sp"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@+id/textView10"
+        app:layout_constraintEnd_toEndOf="@+id/expstore"
         app:layout_constraintStart_toEndOf="@+id/textView10"
         app:layout_constraintTop_toTopOf="@+id/textView10"
         tools:ignore="OnClick" />

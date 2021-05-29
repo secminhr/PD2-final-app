@@ -107,10 +107,10 @@ public class selfinformation extends AppCompatActivity {
         text3.setText(Integer.toString(levelfirst));
     }
     public void ChangeToMap(View v){
-
-        Intent intent = new Intent();
-        intent.setClass(selfinformation.this  , MapActivity.class);
-        startActivity(intent);
+            finish();
+       // Intent intent = new Intent();
+        //intent.setClass(selfinformation.this  , MapActivity.class);
+        //startActivity(intent);
     }
     private void shownomoney(){
         AlertDialog.Builder MyAlertDialog = new AlertDialog.Builder(this);
