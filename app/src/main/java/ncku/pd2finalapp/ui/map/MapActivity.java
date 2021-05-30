@@ -7,7 +7,7 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.Menu;
 import android.view.View;
 import android.widget.Toast;
 
@@ -23,6 +23,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
@@ -34,7 +35,6 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 import java.util.List;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.XmlRes;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import ncku.pd2finalapp.R;
@@ -70,18 +70,28 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-
-
         setContentView(R.layout.activity_map);
         username = getIntent().getStringExtra(LoginActivity.USERNAME_EXTRA);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.mapFragment);
         mapFragment.getMapAsync(map -> {
             this.map = map;
+            map.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style));
             map.getUiSettings().setMapToolbarEnabled(false);
             mapState.setMapReady();
         });
         mapFragment.getView().getViewTreeObserver().addOnGlobalLayoutListener(mapState::setViewRendered);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.map_menu, menu);
+        menu.getItem(0)
+                .setOnMenuItemClickListener(menuItem -> {
+                    ChangeToInfo();
+                    return true;
+                });
+        return true;
     }
 
     @Override
@@ -207,7 +217,7 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
             }
         }
     }
-    public void ChangeToInfo(View v){
+    public void ChangeToInfo(){
 
         Intent intent = new Intent();
         intent.setClass(MapActivity.this  , selfinformation.class);

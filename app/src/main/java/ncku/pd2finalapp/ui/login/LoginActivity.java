@@ -102,7 +102,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void onLoginSuccess() {
-        setLoginState(LoginState.IDLE);
         Intent openMapActivity = new Intent(this, MapActivity.class);
         openMapActivity.putExtra(USERNAME_EXTRA, getStringFromInput(usernameInput));
         startActivity(openMapActivity);
