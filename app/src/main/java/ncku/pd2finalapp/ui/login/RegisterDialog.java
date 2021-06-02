@@ -12,7 +12,6 @@ class RegisterDialog extends FrameLayout {
     private final TextInputLayout username;
     private final TextInputLayout nickname;
     private final TextInputLayout password;
-    private final TextInputLayout faction;
     private final TextInputLayout[] inputs;
 
     RegisterDialog(Context context) {
@@ -22,8 +21,7 @@ class RegisterDialog extends FrameLayout {
         username = findViewById(R.id.usernameInput);
         nickname = findViewById(R.id.nicknameInput);
         password = findViewById(R.id.passwordInput);
-        faction = findViewById(R.id.factionInput);
-        inputs = new TextInputLayout[] { username, nickname, password, faction };
+        inputs = new TextInputLayout[] { username, nickname, password };
 
         for (TextInputLayout input: inputs) {
             input.addOnEditTextAttachedListener(inputLayout ->
@@ -56,9 +54,6 @@ class RegisterDialog extends FrameLayout {
     }
     String getPassword() {
         return password.getEditText().getText().toString();
-    }
-    String getFaction() {
-        return faction.getEditText().getText().toString();
     }
 
 }

@@ -3,12 +3,15 @@ package ncku.pd2finalapp.ui.login;
 import android.app.AlertDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.MapView;
 import com.google.android.material.textfield.TextInputLayout;
 
 import java.net.CookieHandler;
@@ -20,6 +23,9 @@ import ncku.pd2finalapp.R;
 import ncku.pd2finalapp.ui.map.MapActivity;
 import ncku.pd2finalapp.ui.network.CookieStore;
 import ncku.pd2finalapp.ui.network.Network;
+
+import static ncku.pd2finalapp.ui.login.TextFieldTool.getStringFromInput;
+import static ncku.pd2finalapp.ui.login.TextFieldTool.isEmpty;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -60,7 +66,7 @@ public class LoginActivity extends AppCompatActivity {
 
     private void register(RegisterDialog dialog, AlertDialog alert) {
         if (dialog.hasNoEmptyField()) {
-            Network.register(dialog.getUsername(), dialog.getNickname(), dialog.getPassword(), dialog.getFaction())
+            Network.register(dialog.getUsername(), dialog.getNickname(), dialog.getPassword())
                     .setOnSuccessCallback((result) -> onRegisterSuccess(dialog, alert)) //result is always null
                     .setOnFailureCallback(dialog::showErrorOnUsername)
                     .execute();
@@ -90,15 +96,25 @@ public class LoginActivity extends AppCompatActivity {
 
     private void login() {
         setLoginState(LoginState.LOGGING_IN);
+
         if (isEmpty(usernameInput, "username must not be empty") |
             isEmpty(passwordInput, "password must not be empty")) {
             setLoginState(LoginState.IDLE);
             return;
         }
-        Network.login(getStringFromInput(usernameInput), getStringFromInput(passwordInput))
-                .setOnSuccessCallback((result) -> onLoginSuccess()) //result is always null,
-                .setOnFailureCallback(this::onLoginFailed)
-                .execute();
+
+        new Handler().postDelayed(() -> {
+            ProgressBar progressBar = findViewById(R.id.loginProgressBar);
+            MapView mapView = new MapView(this);
+            progressBar.setProgress(30, true);
+            mapView.onCreate(null);
+            progressBar.setProgress(60, true);
+
+            Network.login(getStringFromInput(usernameInput), getStringFromInput(passwordInput))
+                    .setOnSuccessCallback((result) -> onLoginSuccess()) //result is always null,
+                    .setOnFailureCallback(this::onLoginFailed)
+                    .execute();
+        }, 1000);
     }
 
     private void onLoginSuccess() {
@@ -112,18 +128,6 @@ public class LoginActivity extends AppCompatActivity {
         usernameInput.setError(exception.getMessage());
         passwordInput.setError(exception.getMessage());
         setLoginState(LoginState.IDLE);
-    }
-
-    private boolean isEmpty(TextInputLayout input, String messageWhenEmpty) {
-        if (getStringFromInput(input).isEmpty()) {
-            input.setError(messageWhenEmpty);
-            return true;
-        }
-        return false;
-    }
-
-    private String getStringFromInput(TextInputLayout input) {
-        return input.getEditText().getText().toString();
     }
 
     private void setLoginState(LoginState state) {

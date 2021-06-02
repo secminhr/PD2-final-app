@@ -10,18 +10,16 @@ public class RegisterTask extends NetworkTask<Void, RegisterTask.UsernameExistsE
     private final String username;
     private final String nickname;
     private final String password;
-    private final String faction;
 
-    public RegisterTask(String username, String nickname, String password, String faction) {
+    public RegisterTask(String username, String nickname, String password) {
         this.username = username;
         this.nickname = nickname;
         this.password = password;
-        this.faction = faction;
     }
 
     @Override
     protected void task() {
-        String response = TaskRepository.current.registerCheckData(username, nickname, password, faction);
+        String response = TaskRepository.current.registerCheckData(username, nickname, password);
         onReceive(response);
     }
 

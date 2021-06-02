@@ -32,6 +32,8 @@ import com.google.android.gms.maps.model.RoundCap;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
+import java.time.Duration;
+import java.time.LocalTime;
 import java.util.List;
 
 import androidx.annotation.NonNull;
@@ -60,6 +62,8 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
             button.setOnClickListener(this::onStartRecordingClicked);
         }
     }
+
+    private LocalTime startRecordingTime = null;
 
     private final MapState mapState = new MapState().onMapViewReady(() -> {
         moveCamera();
@@ -166,7 +170,7 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
 
         PolylineOptions firstPoint = new PolylineOptions()
                 .add(current)
-                .color(getResources().getColor(R.color.purple_500, null))
+                .color(getResources().getColor(R.color.white, null))
                 .startCap(new RoundCap())
                 .endCap(new RoundCap())
                 .jointType(JointType.ROUND)
@@ -174,6 +178,7 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
 
         walkedPath = map.addPolyline(firstPoint);
         setRecording(true);
+        startRecordingTime = LocalTime.now();
     }
 
     public void onStopRecordingClicked(View v) {
@@ -186,6 +191,10 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
             locationAsyncClient = null;
         }
         setRecording(false);
+        long minutes = Duration.between(startRecordingTime, LocalTime.now()).toMinutes();
+        startRecordingTime = null;
+        //TODO: fix the target
+        Network.sendAttack(walkedPath.getPoints(), minutes, walkedPath.getPoints().get(0)).execute();
     }
 
     @SuppressLint("MissingPermission")
@@ -203,6 +212,7 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
         @Override
         public void onLocationResult(@NonNull LocationResult locationResult) {
             super.onLocationResult(locationResult);
+
             Location last = locationResult.getLastLocation();
             LatLng newPoint = new LatLng(last.getLatitude(), last.getLongitude());
             currentMarker.setPosition(newPoint);
@@ -218,9 +228,8 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
         }
     }
     public void ChangeToInfo(){
-
         Intent intent = new Intent();
-        intent.setClass(MapActivity.this  , selfinformation.class);
+        intent.setClass(MapActivity.this, selfinformation.class);
         startActivity(intent);
     }
 }

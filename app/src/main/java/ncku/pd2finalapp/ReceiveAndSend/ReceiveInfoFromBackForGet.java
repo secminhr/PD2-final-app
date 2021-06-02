@@ -1,16 +1,14 @@
 package ncku.pd2finalapp.ReceiveAndSend;
+
 import android.os.AsyncTask;
 import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.charset.StandardCharsets;
-
 
 import javax.net.ssl.HttpsURLConnection;
 
@@ -19,7 +17,7 @@ import javax.net.ssl.HttpsURLConnection;
 public class ReceiveInfoFromBackForGet extends AsyncTask<String, Void, String> {
 
     private Exception exception;
-    protected static String network = "https://polite-jellyfish-70.loca.lt/";
+    protected static String network = "https://lazy-grasshopper-38.loca.lt/";
     protected String Information = "sasader";
     protected String sendtype = null;
     protected String texttype = null;
@@ -49,7 +47,7 @@ public class ReceiveInfoFromBackForGet extends AsyncTask<String, Void, String> {
             //get code
             int response = connect.getResponseCode();
             String c = String.valueOf(response);
-
+            Log.e("ReceiveInfoFromBackForGet", "status code: " + response);
 
             //receive
             if( response < 400 ) {

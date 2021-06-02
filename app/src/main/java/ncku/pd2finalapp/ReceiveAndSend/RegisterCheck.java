@@ -7,14 +7,13 @@ import java.util.concurrent.ExecutionException;
 
 public class RegisterCheck extends ReceiveInfoFromBack {
 
-    public String RegisterCheckData(String username, String nickname, String password, String faction) {
+    public String RegisterCheckData(String username, String nickname, String password) {
         sendtype = "POST";
         texttype = "json";
         Information = "{\n" +
                 "  \"username\": \"" + username + "\",\n" +
                 "  \"nickname\": \"" + nickname + "\",\n" +
-                "  \"password\": \"" + password + "\",\n" +
-                "  \"faction\": \"" + faction + "\"\n" +
+                "  \"password\": \"" + password + "\"\n" +
                 "}";
         AsyncTask<String, Void, String> temp = super.execute(network + "register");
 

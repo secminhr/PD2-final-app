@@ -7,6 +7,7 @@
         <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.1" />
         <entry key="app/src/main/res/drawable/ic_baseline_account_circle_24.xml" value="0.17685185185185184" />
         <entry key="app/src/main/res/drawable/ic_baseline_connecting_24.xml" value="0.29025641025641025" />
+        <entry key="app/src/main/res/drawable/ic_baseline_directions_run_24.xml" value="0.17685185185185184" />
         <entry key="app/src/main/res/drawable/ic_baseline_record_24.xml" value="0.29025641025641025" />
         <entry key="app/src/main/res/drawable/ic_baseline_stop_24.xml" value="0.29025641025641025" />
         <entry key="app/src/main/res/drawable/ic_changetoinfo.xml" value="0.22592592592592592" />
@@ -19,6 +20,7 @@
         <entry key="app/src/main/res/layout/activity_main.xml" value="0.20170940170940171" />
         <entry key="app/src/main/res/layout/activity_map.xml" value="0.19536423841059603" />
         <entry key="app/src/main/res/layout/activity_register.xml" value="0.25" />
+        <entry key="app/src/main/res/layout/activity_splash.xml" value="0.165" />
         <entry key="app/src/main/res/layout/dialog_register.xml" value="0.18807339449541285" />
         <entry key="app/src/main/res/layout/information_upgrade.xml" value="0.25" />
         <entry key="app/src/main/res/layout/sample_resgister_dialog.xml" value="0.2111111111111111" />
@@ -28,7 +30,7 @@
     </option>
   </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="JDK" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" project-jdk-name="JDK" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/build/classes" />
   </component>
   <component name="ProjectType">

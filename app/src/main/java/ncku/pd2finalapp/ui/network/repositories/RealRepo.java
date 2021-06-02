@@ -1,5 +1,10 @@
 package ncku.pd2finalapp.ui.network.repositories;
 
+import com.google.android.gms.maps.model.LatLng;
+
+import java.util.List;
+
+import ncku.pd2finalapp.ReceiveAndSend.AttackCheck;
 import ncku.pd2finalapp.ReceiveAndSend.InfoCheck;
 import ncku.pd2finalapp.ReceiveAndSend.LoginCheck;
 import ncku.pd2finalapp.ReceiveAndSend.RegisterCheck;
@@ -17,7 +22,12 @@ class RealRepo implements TaskRepository {
     }
 
     @Override
-    public String registerCheckData(String username, String nickname, String password, String faction) {
-        return new RegisterCheck().RegisterCheckData(username, nickname, password, faction);
+    public String registerCheckData(String username, String nickname, String password) {
+        return new RegisterCheck().RegisterCheckData(username, nickname, password);
+    }
+
+    @Override
+    public void sendAttackData(List<LatLng> points, long duration, LatLng target) {
+        new AttackCheck().sendAttackData(points, duration, target);
     }
 }

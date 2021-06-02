@@ -1,5 +1,9 @@
 package ncku.pd2finalapp.ui.network.repositories;
 
+import com.google.android.gms.maps.model.LatLng;
+
+import java.util.List;
+
 //A mock repo that always return success data.
 class MockSuccessRepo implements TaskRepository {
     @Override
@@ -24,10 +28,15 @@ class MockSuccessRepo implements TaskRepository {
     }
 
     @Override
-    public String registerCheckData(String username, String nickname, String password, String faction) {
+    public String registerCheckData(String username, String nickname, String password) {
         return "{\n" +
                 "  \"success\": true,\n" +
                 "  \"auth\": \"/login\"\n" +
                 "}";
+    }
+
+    @Override
+    public void sendAttackData(List<LatLng> points, long duration, LatLng target) {
+        return;
     }
 }

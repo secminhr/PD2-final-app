@@ -1,14 +1,19 @@
 package ncku.pd2finalapp.ui.network;
 
+import com.google.android.gms.maps.model.LatLng;
+
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.List;
 
+import ncku.pd2finalapp.ReceiveAndSend.ReceiveInfoFromBack;
 import ncku.pd2finalapp.ui.info.UserInfo;
 import ncku.pd2finalapp.ui.network.tasks.InfoTask;
 import ncku.pd2finalapp.ui.network.tasks.LoginTask;
 import ncku.pd2finalapp.ui.network.tasks.NetworkTask;
 import ncku.pd2finalapp.ui.network.tasks.NoException;
 import ncku.pd2finalapp.ui.network.tasks.RegisterTask;
+import ncku.pd2finalapp.ui.network.tasks.SendAttackTask;
 
 //Provide an interface to interact with networking part in a non-blocking way
 public class Network {
@@ -16,16 +21,20 @@ public class Network {
         return new LoginTask(username, password);
     }
 
-    public static NetworkTask<Void, RegisterTask.UsernameExistsException> register(String username, String nickname, String password, String faction) {
-        return new RegisterTask(username, nickname, password, faction);
+    public static NetworkTask<Void, RegisterTask.UsernameExistsException> register(String username, String nickname, String password) {
+        return new RegisterTask(username, nickname, password);
     }
 
     public static NetworkTask<UserInfo, NoException> getUserInfo() {
         return new InfoTask();
     }
 
+    public static NetworkTask<Void, NoException> sendAttack(List<LatLng> points,long durationInMinute, LatLng target) {
+        return new SendAttackTask(points, durationInMinute, target);
+    }
+
     public static WSClient createWebSocketConnection(String username) {
-        String uri = "";
+        String uri = ReceiveInfoFromBack.network +  "websocket";
         try {
             URI server = new URI(uri);
             WSClient client = new WSClient(server, username);
