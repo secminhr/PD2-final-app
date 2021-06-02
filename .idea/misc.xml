@@ -5,11 +5,14 @@
       <map>
         <entry key="../../../../layout/custom_preview.xml" value="0.1" />
         <entry key="app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.1" />
+        <entry key="app/src/main/res/drawable/castle_red.xml" value="0.17685185185185184" />
+        <entry key="app/src/main/res/drawable/castle_white.xml" value="0.17685185185185184" />
         <entry key="app/src/main/res/drawable/ic_baseline_account_circle_24.xml" value="0.17685185185185184" />
         <entry key="app/src/main/res/drawable/ic_baseline_connecting_24.xml" value="0.29025641025641025" />
         <entry key="app/src/main/res/drawable/ic_baseline_directions_run_24.xml" value="0.17685185185185184" />
         <entry key="app/src/main/res/drawable/ic_baseline_record_24.xml" value="0.29025641025641025" />
         <entry key="app/src/main/res/drawable/ic_baseline_stop_24.xml" value="0.29025641025641025" />
+        <entry key="app/src/main/res/drawable/ic_castle_red.xml" value="0.17685185185185184" />
         <entry key="app/src/main/res/drawable/ic_changetoinfo.xml" value="0.22592592592592592" />
         <entry key="app/src/main/res/drawable/ic_info.xml" value="0.29025641025641025" />
         <entry key="app/src/main/res/drawable/ic_launcher_background.xml" value="0.29025641025641025" />

@@ -123,13 +123,13 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
     }
 
     private void markForts() {
-//        for (LatLng position: fortsPositions) {
-//            map.addMarker(
-//                new MarkerOptions()
-//                    .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmap(R.drawable.noun_castle_red)))
-//                    .position(position)
-//            );
-//        }
+        for (LatLng position: fortsPositions) {
+            map.addMarker(
+                new MarkerOptions()
+                    .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmap(R.drawable.castle_red)))
+                    .position(position)
+            );
+        }
     }
 
     private final LocationPermissionHelper permissionHelper = new LocationPermissionHelper(this).onUserDeny(() -> {

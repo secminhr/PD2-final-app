@@ -20,14 +20,9 @@ public class UserInfo {
         return status.nickname;
     }
 
-    public String getFaction() {
-        return status.faction;
-    }
-
     static class Status {
         private int exp;
         private int level;
         private String nickname;
-        private String faction;
     }
 }
