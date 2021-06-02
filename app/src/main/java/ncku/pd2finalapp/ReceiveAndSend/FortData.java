@@ -12,7 +12,7 @@ public class FortData extends ReceiveInfoFromBackForGet {
         //TODO: adapt to backend
         sendtype = "GET";
 
-        AsyncTask<String, Void, String> task = execute(ENDPOINT);
+        AsyncTask<String, Void, String> task = execute(network + ENDPOINT);
         try {
             return task.get();
         } catch (ExecutionException|InterruptedException e) {

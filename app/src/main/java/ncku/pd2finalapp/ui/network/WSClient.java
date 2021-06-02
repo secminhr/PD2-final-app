@@ -2,30 +2,26 @@ package ncku.pd2finalapp.ui.network;
 
 import android.util.Log;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
+import java.io.IOException;
+import java.net.CookieHandler;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import ncku.pd2finalapp.ReceiveAndSend.ReceiveInfoFromBack;
 
 public class WSClient {
 
     private Client client;
-    private String username;
-    public WSClient(URI uri, String username) {
+    public WSClient(URI uri) {
+
         client = new Client(uri);
-        this.username = username;
-    }
-
-    public void send(LatLng latLng) {
-        if (client.isOpen()) {
-            client.send(toWSFormat(latLng));
-        }
-    }
-
-    private String toWSFormat(LatLng latlng) {
-        return "{\"id\":" + username + ",\"longitude\":" + latlng.longitude + ",\"latitude\":" + latlng.latitude + "}";
     }
 
     public boolean connectBlocking() throws InterruptedException {
@@ -38,7 +34,16 @@ public class WSClient {
 
     private static class Client extends WebSocketClient {
         private Client(URI uri) {
-            super(uri);
+            super(uri, new HashMap<String, String>() {{
+                try {
+                    Map<String, List<String>> cookies = new HashMap<>();
+                    cookies = CookieHandler.getDefault().get(new URI(ReceiveInfoFromBack.network), cookies);
+
+                    this.put("Cookie", cookies.get("Cookie").stream().collect(Collectors.joining("; ")));
+                } catch (IOException|URISyntaxException e) {
+                    e.printStackTrace();
+                }
+            }});
         }
 
         //all left empty since format is not decided
@@ -51,6 +56,7 @@ public class WSClient {
         public void onMessage(String message) {
             Log.e("WSClient", "onMessage");
             Log.e("WSClient", message);
+            //TODO: deal with message
         }
 
         @Override

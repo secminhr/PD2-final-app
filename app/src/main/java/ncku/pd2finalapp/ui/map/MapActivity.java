@@ -40,7 +40,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 import ncku.pd2finalapp.R;
-import ncku.pd2finalapp.ui.login.LoginActivity;
 import ncku.pd2finalapp.ui.network.Network;
 import ncku.pd2finalapp.ui.network.WSClient;
 import ncku.pd2finalapp.ui.selfinfo.selfinformation;
@@ -50,8 +49,11 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
     private GoogleMap map;
     private Polyline walkedPath;
     private Marker currentMarker;
-    private WSClient locationAsyncClient;
-    private String username;
+    private List<LatLng> fortsPositions;
+
+    //note: there will be 3
+    private WSClient wsClient = null;
+
     private boolean isRecording = false;
     private void setRecording(boolean value) {
         isRecording = value;
@@ -62,11 +64,11 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
             button.setOnClickListener(this::onStartRecordingClicked);
         }
     }
-
     private LocalTime startRecordingTime = null;
 
     private final MapState mapState = new MapState().onMapViewReady(() -> {
         moveCamera();
+        fetchAndMarkForts();
         markCurrent();
     });
 
@@ -75,7 +77,6 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_map);
-        username = getIntent().getStringExtra(LoginActivity.USERNAME_EXTRA);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.mapFragment);
         mapFragment.getMapAsync(map -> {
@@ -85,24 +86,24 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
             mapState.setMapReady();
         });
         mapFragment.getView().getViewTreeObserver().addOnGlobalLayoutListener(mapState::setViewRendered);
+        wsClient = Network.createWebSocketConnection();
     }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.map_menu, menu);
-        menu.getItem(0)
-                .setOnMenuItemClickListener(menuItem -> {
-                    ChangeToInfo();
-                    return true;
-                });
+        menu.getItem(0).setOnMenuItemClickListener(menuItem -> {
+            ChangeToInfo();
+            return true;
+        });
         return true;
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (locationAsyncClient != null) {
-            locationAsyncClient.close();
+        if (wsClient != null) {
+            wsClient.close();
         }
     }
 
@@ -110,6 +111,25 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
         //move camera to fit the campus on screen
         LatLngBounds bounds = new LatLngBounds(new LatLng(22.993063582069528, 120.21391101450412), new LatLng(23.002434, 120.224757));
         map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100));
+    }
+
+    private void fetchAndMarkForts() {
+        Network.getFortsData()
+                .setOnSuccessCallback((data) -> {
+                    fortsPositions = data.getFortPositions();
+                    markForts();
+                })
+                .execute();
+    }
+
+    private void markForts() {
+//        for (LatLng position: fortsPositions) {
+//            map.addMarker(
+//                new MarkerOptions()
+//                    .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmap(R.drawable.noun_castle_red)))
+//                    .position(position)
+//            );
+//        }
     }
 
     private final LocationPermissionHelper permissionHelper = new LocationPermissionHelper(this).onUserDeny(() -> {
@@ -131,7 +151,7 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
     @Override
     public void onSuccess(Location location) {
         LatLng current = new LatLng(location.getLatitude(), location.getLongitude());
-        Bitmap markerBitmap = getMarkerBitmap();
+        Bitmap markerBitmap = getMarkerBitmap(R.drawable.map_marker);
         currentMarker = map.addMarker(
                 new MarkerOptions()
                         .position(current)
@@ -143,8 +163,8 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
         requestLocationUpdate();
     }
 
-    private Bitmap getMarkerBitmap() {
-        Drawable drawable = ContextCompat.getDrawable(this, R.drawable.map_marker);
+    private Bitmap getMarkerBitmap(int id) {
+        Drawable drawable = ContextCompat.getDrawable(this, id);
         Canvas canvas = new Canvas();
         int width = drawable.getIntrinsicWidth();
         int height = drawable.getIntrinsicHeight();
@@ -160,13 +180,10 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
         button.setText("Connecting...");
         button.setIconResource(R.drawable.ic_baseline_connecting_24);
         LatLng current = currentMarker.getPosition();
-        locationAsyncClient = Network.createWebSocketConnection(username);
+        wsClient = Network.createWebSocketConnection();
 
         button.setIconResource(R.drawable.ic_baseline_stop_24);
         button.shrink();
-        if (locationAsyncClient != null) {
-            locationAsyncClient.send(current);
-        }
 
         PolylineOptions firstPoint = new PolylineOptions()
                 .add(current)
@@ -186,9 +203,9 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
         button.setText("Start Recording");
         button.setIconResource(R.drawable.ic_baseline_record_24);
         button.extend();
-        if (locationAsyncClient != null) {
-            locationAsyncClient.close();
-            locationAsyncClient = null;
+        if (wsClient != null) {
+            wsClient.close();
+            wsClient = null;
         }
         setRecording(false);
         long minutes = Duration.between(startRecordingTime, LocalTime.now()).toMinutes();
@@ -220,9 +237,6 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
             if (isRecording) {
                 List<LatLng> points = walkedPath.getPoints();
                 points.add(newPoint);
-                if (locationAsyncClient != null) {
-                    locationAsyncClient.send(newPoint);
-                }
                 walkedPath.setPoints(points);
             }
         }

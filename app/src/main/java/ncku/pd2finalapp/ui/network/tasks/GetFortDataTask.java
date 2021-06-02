@@ -4,7 +4,7 @@ import ncku.pd2finalapp.ReceiveAndSend.FortData;
 import ncku.pd2finalapp.ui.map.FortDataModel;
 
 //TODO: Change Exception to appropriate one
-class GetFortDataTask extends NetworkTask<FortDataModel, Exception> {
+public class GetFortDataTask extends NetworkTask<FortDataModel, Exception> {
 
     @Override
     protected void task() {

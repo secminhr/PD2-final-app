@@ -6,8 +6,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
 
-import ncku.pd2finalapp.ReceiveAndSend.ReceiveInfoFromBack;
 import ncku.pd2finalapp.ui.info.UserInfo;
+import ncku.pd2finalapp.ui.map.FortDataModel;
+import ncku.pd2finalapp.ui.network.tasks.GetFortDataTask;
 import ncku.pd2finalapp.ui.network.tasks.InfoTask;
 import ncku.pd2finalapp.ui.network.tasks.LoginTask;
 import ncku.pd2finalapp.ui.network.tasks.NetworkTask;
@@ -20,24 +21,24 @@ public class Network {
     public static NetworkTask<Void, LoginTask.LoginFailedException> login(String username, String password) {
         return new LoginTask(username, password);
     }
-
     public static NetworkTask<Void, RegisterTask.UsernameExistsException> register(String username, String nickname, String password) {
         return new RegisterTask(username, nickname, password);
     }
-
     public static NetworkTask<UserInfo, NoException> getUserInfo() {
         return new InfoTask();
     }
-
     public static NetworkTask<Void, NoException> sendAttack(List<LatLng> points,long durationInMinute, LatLng target) {
         return new SendAttackTask(points, durationInMinute, target);
     }
+    public static NetworkTask<FortDataModel, Exception> getFortsData() {
+        return new GetFortDataTask();
+    }
 
-    public static WSClient createWebSocketConnection(String username) {
-        String uri = ReceiveInfoFromBack.network +  "websocket";
+    public static WSClient createWebSocketConnection() {
+        String uri = "ws://smooth-goat-97.loca.lt/websocket";
         try {
             URI server = new URI(uri);
-            WSClient client = new WSClient(server, username);
+            WSClient client = new WSClient(server);
             client.connectBlocking();
             return client;
         } catch (URISyntaxException e) {
