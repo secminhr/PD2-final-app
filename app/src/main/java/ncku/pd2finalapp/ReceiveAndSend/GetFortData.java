@@ -4,12 +4,11 @@ import android.os.AsyncTask;
 
 import java.util.concurrent.ExecutionException;
 
-public class FortData extends ReceiveInfoFromBackForGet {
-    private static final String ENDPOINT = "";
+public class GetFortData extends ReceiveInfoFromBackForGet {
+    private static final String ENDPOINT = "positionAndBlood";
 
 
     public String getFortData() {
-        //TODO: adapt to backend
         sendtype = "GET";
 
         AsyncTask<String, Void, String> task = execute(network + ENDPOINT);

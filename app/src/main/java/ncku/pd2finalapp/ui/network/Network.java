@@ -7,7 +7,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 
 import ncku.pd2finalapp.ui.info.UserInfo;
-import ncku.pd2finalapp.ui.map.FortDataModel;
+import ncku.pd2finalapp.ui.map.FortData;
 import ncku.pd2finalapp.ui.network.tasks.GetFortDataTask;
 import ncku.pd2finalapp.ui.network.tasks.InfoTask;
 import ncku.pd2finalapp.ui.network.tasks.LoginTask;
@@ -30,12 +30,12 @@ public class Network {
     public static NetworkTask<Void, NoException> sendAttack(List<LatLng> points,long durationInMinute, LatLng target) {
         return new SendAttackTask(points, durationInMinute, target);
     }
-    public static NetworkTask<FortDataModel, Exception> getFortsData() {
+    public static NetworkTask<List<FortData>, NoException> getFortsData() {
         return new GetFortDataTask();
     }
 
     public static WSClient createWebSocketConnection() {
-        String uri = "ws://smooth-goat-97.loca.lt/websocket";
+        String uri = "ws://popular-sloth-16.loca.lt/websocket";
         try {
             URI server = new URI(uri);
             WSClient client = new WSClient(server);

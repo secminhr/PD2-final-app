@@ -3,8 +3,6 @@ package ncku.pd2finalapp.ui.map;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.Menu;
@@ -38,21 +36,27 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
 import ncku.pd2finalapp.R;
 import ncku.pd2finalapp.ui.network.Network;
 import ncku.pd2finalapp.ui.network.WSClient;
 import ncku.pd2finalapp.ui.selfinfo.selfinformation;
 
+import static ncku.pd2finalapp.ui.map.MarkerTool.getMarkerBitmap;
+import static ncku.pd2finalapp.ui.map.MarkerTool.mixBitmapByRatio;
+
 public class MapActivity extends AppCompatActivity implements OnSuccessListener<Location> {
+
+    private static final String FORT_MARKER_TAG = "fort";
 
     private GoogleMap map;
     private Polyline walkedPath;
     private Marker currentMarker;
-    private List<LatLng> fortsPositions;
+    private List<FortData> forts;
 
     //note: there will be 3
-    private WSClient wsClient = null;
+    private WSClient fortBloodChangeClient = null;
+    private WSClient gameEndClient = null;
+    private WSClient readyForRestartClient = null;
 
     private boolean isRecording = false;
     private void setRecording(boolean value) {
@@ -83,10 +87,11 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
             this.map = map;
             map.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style));
             map.getUiSettings().setMapToolbarEnabled(false);
+            map.setOnMarkerClickListener(this::onMarkerClick);
             mapState.setMapReady();
         });
         mapFragment.getView().getViewTreeObserver().addOnGlobalLayoutListener(mapState::setViewRendered);
-        wsClient = Network.createWebSocketConnection();
+        fortBloodChangeClient = Network.createWebSocketConnection();
     }
 
     @Override
@@ -102,33 +107,38 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (wsClient != null) {
-            wsClient.close();
+        if (fortBloodChangeClient != null) {
+            fortBloodChangeClient.close();
         }
     }
 
     private void moveCamera() {
         //move camera to fit the campus on screen
         LatLngBounds bounds = new LatLngBounds(new LatLng(22.993063582069528, 120.21391101450412), new LatLng(23.002434, 120.224757));
-        map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 100));
+        map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0));
     }
 
     private void fetchAndMarkForts() {
         Network.getFortsData()
                 .setOnSuccessCallback((data) -> {
-                    fortsPositions = data.getFortPositions();
+                    forts = data;
                     markForts();
                 })
                 .execute();
     }
 
     private void markForts() {
-        for (LatLng position: fortsPositions) {
-            map.addMarker(
+        for (FortData fort: forts) {
+            Bitmap red = getMarkerBitmap(this, R.drawable.castle_red);
+            Bitmap white = getMarkerBitmap(this, R.drawable.castle_white);
+            mixBitmapByRatio(red, white, 1 - fort.getHpRatio());
+
+            Marker marker = map.addMarker(
                 new MarkerOptions()
-                    .icon(BitmapDescriptorFactory.fromBitmap(getMarkerBitmap(R.drawable.castle_red)))
-                    .position(position)
+                    .icon(BitmapDescriptorFactory.fromBitmap(red))
+                    .position(fort.getFortPosition())
             );
+            marker.setTag(FORT_MARKER_TAG);
         }
     }
 
@@ -151,7 +161,7 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
     @Override
     public void onSuccess(Location location) {
         LatLng current = new LatLng(location.getLatitude(), location.getLongitude());
-        Bitmap markerBitmap = getMarkerBitmap(R.drawable.map_marker);
+        Bitmap markerBitmap = getMarkerBitmap(this, R.drawable.map_marker);
         currentMarker = map.addMarker(
                 new MarkerOptions()
                         .position(current)
@@ -163,24 +173,12 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
         requestLocationUpdate();
     }
 
-    private Bitmap getMarkerBitmap(int id) {
-        Drawable drawable = ContextCompat.getDrawable(this, id);
-        Canvas canvas = new Canvas();
-        int width = drawable.getIntrinsicWidth();
-        int height = drawable.getIntrinsicHeight();
-        Bitmap markerBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        canvas.setBitmap(markerBitmap);
-        drawable.setBounds(0, 0, width, height);
-        drawable.draw(canvas);
-        return markerBitmap;
-    }
-
     public void onStartRecordingClicked(View v) {
         ExtendedFloatingActionButton button = (ExtendedFloatingActionButton) v;
         button.setText("Connecting...");
         button.setIconResource(R.drawable.ic_baseline_connecting_24);
         LatLng current = currentMarker.getPosition();
-        wsClient = Network.createWebSocketConnection();
+        fortBloodChangeClient = Network.createWebSocketConnection();
 
         button.setIconResource(R.drawable.ic_baseline_stop_24);
         button.shrink();
@@ -203,9 +201,9 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
         button.setText("Start Recording");
         button.setIconResource(R.drawable.ic_baseline_record_24);
         button.extend();
-        if (wsClient != null) {
-            wsClient.close();
-            wsClient = null;
+        if (fortBloodChangeClient != null) {
+            fortBloodChangeClient.close();
+            fortBloodChangeClient = null;
         }
         setRecording(false);
         long minutes = Duration.between(startRecordingTime, LocalTime.now()).toMinutes();
@@ -223,6 +221,16 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
                     .setInterval(5000);
             client.requestLocationUpdates(request, new CurrentLocationCallback(), getMainLooper());
         });
+    }
+
+    public boolean onMarkerClick(Marker marker) {
+        if (((String) marker.getTag()).equals(FORT_MARKER_TAG)) {
+            Toast.makeText(
+                    this, "Get closer to the fort to attack it", Toast.LENGTH_SHORT
+            ).show();
+            return true;
+        }
+        return false;
     }
 
     private class CurrentLocationCallback extends LocationCallback {

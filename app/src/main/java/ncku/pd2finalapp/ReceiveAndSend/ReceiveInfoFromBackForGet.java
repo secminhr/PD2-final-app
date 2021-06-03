@@ -17,7 +17,7 @@ import javax.net.ssl.HttpsURLConnection;
 public class ReceiveInfoFromBackForGet extends AsyncTask<String, Void, String> {
 
     private Exception exception;
-    protected static String network = "https://smooth-goat-97.loca.lt/";
+    protected static String network = "https://popular-sloth-16.loca.lt/";
     protected String Information = "sasader";
     protected String sendtype = null;
     protected String texttype = null;
