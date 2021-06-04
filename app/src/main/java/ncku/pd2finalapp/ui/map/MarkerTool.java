@@ -5,7 +5,11 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 
+import com.google.android.gms.maps.model.BitmapDescriptor;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+
 import androidx.core.content.ContextCompat;
+import ncku.pd2finalapp.R;
 
 class MarkerTool {
     static Bitmap getMarkerBitmap(Context context, int id) {
@@ -26,5 +30,16 @@ class MarkerTool {
         int[] pixels = new int[mixerWidth * height];
         mixer.getPixels(pixels, 0, mixerWidth, 0, 0, mixerWidth, height);
         source.setPixels(pixels, 0, mixerWidth, 0, 0, mixerWidth, height);
+    }
+
+    static Bitmap getFortBitmap(Context context, FortData fort) {
+        Bitmap red = getMarkerBitmap(context, R.drawable.castle_red);
+        Bitmap white = getMarkerBitmap(context, R.drawable.castle_white);
+        mixBitmapByRatio(red, white, 1 - fort.getHpRatio());
+        return red;
+    }
+
+    static BitmapDescriptor getFortBitmapDescriptor(Context context, FortData fort) {
+        return BitmapDescriptorFactory.fromBitmap(getFortBitmap(context, fort));
     }
 }

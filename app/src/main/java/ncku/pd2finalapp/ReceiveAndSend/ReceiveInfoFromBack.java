@@ -18,7 +18,7 @@ import javax.net.ssl.HttpsURLConnection;
 public class ReceiveInfoFromBack extends AsyncTask<String, Void, String> {
 
     private Exception exception;
-    public static String network = "https://popular-sloth-16.loca.lt/";
+    public static String network = "https://splendid-dolphin-86.loca.lt/";
     protected String Information = "sasader";
     protected String sendtype = null;
     protected String texttype = null;

@@ -17,6 +17,11 @@ public class FortData {
     public double getHpRatio() {
         return 1.0 * hp / maxHp;
     }
+
+    public String getHpRepresentation() {
+        return hp + "/" + maxHp;
+    }
+
     public LatLng getFortPosition() {
         return position;
     }

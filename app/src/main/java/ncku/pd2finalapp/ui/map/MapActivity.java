@@ -2,11 +2,15 @@ package ncku.pd2finalapp.ui.map;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
@@ -28,6 +32,7 @@ import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
 import java.time.Duration;
@@ -36,22 +41,24 @@ import java.util.List;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import ncku.pd2finalapp.R;
 import ncku.pd2finalapp.ui.network.Network;
 import ncku.pd2finalapp.ui.network.WSClient;
 import ncku.pd2finalapp.ui.selfinfo.selfinformation;
 
+import static ncku.pd2finalapp.ui.map.MarkerTool.getFortBitmap;
+import static ncku.pd2finalapp.ui.map.MarkerTool.getFortBitmapDescriptor;
 import static ncku.pd2finalapp.ui.map.MarkerTool.getMarkerBitmap;
-import static ncku.pd2finalapp.ui.map.MarkerTool.mixBitmapByRatio;
 
 public class MapActivity extends AppCompatActivity implements OnSuccessListener<Location> {
-
-    private static final String FORT_MARKER_TAG = "fort";
 
     private GoogleMap map;
     private Polyline walkedPath;
     private Marker currentMarker;
     private List<FortData> forts;
+
+    private BottomSheetBehavior<ConstraintLayout> bottomSheet;
 
     //note: there will be 3
     private WSClient fortBloodChangeClient = null;
@@ -62,10 +69,10 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
     private void setRecording(boolean value) {
         isRecording = value;
         ExtendedFloatingActionButton button = findViewById(R.id.fab);
-        if (isRecording) {
-            button.setOnClickListener(this::onStopRecordingClicked);
-        } else {
+        if (!isRecording) {
             button.setOnClickListener(this::onStartRecordingClicked);
+        } else {
+            button.setOnClickListener(null);
         }
     }
     private LocalTime startRecordingTime = null;
@@ -91,7 +98,13 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
             mapState.setMapReady();
         });
         mapFragment.getView().getViewTreeObserver().addOnGlobalLayoutListener(mapState::setViewRendered);
+        ConstraintLayout sheet = findViewById(R.id.bottomSheet);
+        bottomSheet = BottomSheetBehavior.from(sheet);
+        bottomSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
+
         fortBloodChangeClient = Network.createWebSocketConnection();
+        gameEndClient = Network.createWebSocketConnection();
+        readyForRestartClient = Network.createWebSocketConnection();
     }
 
     @Override
@@ -129,16 +142,12 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
 
     private void markForts() {
         for (FortData fort: forts) {
-            Bitmap red = getMarkerBitmap(this, R.drawable.castle_red);
-            Bitmap white = getMarkerBitmap(this, R.drawable.castle_white);
-            mixBitmapByRatio(red, white, 1 - fort.getHpRatio());
-
             Marker marker = map.addMarker(
                 new MarkerOptions()
-                    .icon(BitmapDescriptorFactory.fromBitmap(red))
+                    .icon(getFortBitmapDescriptor(this, fort))
                     .position(fort.getFortPosition())
             );
-            marker.setTag(FORT_MARKER_TAG);
+            marker.setTag(fort);
         }
     }
 
@@ -175,14 +184,11 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
 
     public void onStartRecordingClicked(View v) {
         ExtendedFloatingActionButton button = (ExtendedFloatingActionButton) v;
-        button.setText("Connecting...");
-        button.setIconResource(R.drawable.ic_baseline_connecting_24);
-        LatLng current = currentMarker.getPosition();
-        fortBloodChangeClient = Network.createWebSocketConnection();
-
-        button.setIconResource(R.drawable.ic_baseline_stop_24);
+        button.setIconTint(ColorStateList.valueOf(Color.BLACK));
+        button.setBackgroundColor(Color.WHITE);
         button.shrink();
 
+        LatLng current = currentMarker.getPosition();
         PolylineOptions firstPoint = new PolylineOptions()
                 .add(current)
                 .color(getResources().getColor(R.color.white, null))
@@ -201,15 +207,9 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
         button.setText("Start Recording");
         button.setIconResource(R.drawable.ic_baseline_record_24);
         button.extend();
-        if (fortBloodChangeClient != null) {
-            fortBloodChangeClient.close();
-            fortBloodChangeClient = null;
-        }
         setRecording(false);
         long minutes = Duration.between(startRecordingTime, LocalTime.now()).toMinutes();
         startRecordingTime = null;
-        //TODO: fix the target
-        Network.sendAttack(walkedPath.getPoints(), minutes, walkedPath.getPoints().get(0)).execute();
     }
 
     @SuppressLint("MissingPermission")
@@ -224,13 +224,21 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
     }
 
     public boolean onMarkerClick(Marker marker) {
-        if (((String) marker.getTag()).equals(FORT_MARKER_TAG)) {
-            Toast.makeText(
-                    this, "Get closer to the fort to attack it", Toast.LENGTH_SHORT
-            ).show();
+        if (marker.getTag() != null) {
+            setUpBottomSheet((FortData) marker.getTag());
+            ConstraintLayout sheet = findViewById(R.id.bottomSheet);
+            BottomSheetBehavior<ConstraintLayout> bottomSheet = BottomSheetBehavior.from(sheet);
+            bottomSheet.setState(BottomSheetBehavior.STATE_EXPANDED);
             return true;
         }
         return false;
+    }
+
+    private void setUpBottomSheet(FortData fort) {
+        ImageView fortImageView = findViewById(R.id.fortImage);
+        fortImageView.setImageBitmap(getFortBitmap(this, fort));
+        TextView hpTextView = findViewById(R.id.hpTextView);
+        hpTextView.setText(fort.getHpRepresentation());
     }
 
     private class CurrentLocationCallback extends LocationCallback {

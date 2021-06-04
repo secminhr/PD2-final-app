@@ -35,7 +35,7 @@ public class Network {
     }
 
     public static WSClient createWebSocketConnection() {
-        String uri = "ws://popular-sloth-16.loca.lt/websocket";
+        String uri = "ws://splendid-dolphin-86.loca.lt/websocket";
         try {
             URI server = new URI(uri);
             WSClient client = new WSClient(server);
