@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.view.Menu;
 import android.view.View;
 import android.widget.ImageView;
@@ -197,9 +198,12 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
                 .jointType(JointType.ROUND)
                 .width(25);
 
+
         walkedPath = map.addPolyline(firstPoint);
         setRecording(true);
         startRecordingTime = LocalTime.now();
+
+
     }
 
     public void onStopRecordingClicked(View v) {
@@ -208,7 +212,19 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
         button.setIconResource(R.drawable.ic_baseline_record_24);
         button.extend();
         setRecording(false);
+        /*new CountDownTimer(long millisInFuture, long countDownInterval) {
+            TextView text1 = findViewById(R.id.timer);
+
+            public void onTick(long millisUntilFinished) {
+                text1.setText("seconds remaining: " + millisUntilFinished / 1000);
+            }
+
+            public void onFinish() {
+                text1.setText("Attack Finish");
+            }
+        }.start();*/
         long minutes = Duration.between(startRecordingTime, LocalTime.now()).toMinutes();
+
         startRecordingTime = null;
     }
 
