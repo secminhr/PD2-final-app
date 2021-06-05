@@ -39,11 +39,9 @@ public class Network {
     public static WSClient<FortBloodUpdateClient.BloodUpdate> bloodUpdateClient() {
         return tryConnect(new FortBloodUpdateClient());
     }
-
     public static WSClient<Void> endGameClient() {
         return tryConnect(new EndGameClient());
     }
-
     public static WSClient<Void> restartClient() {
         return tryConnect(new RestartReadyClient());
     }

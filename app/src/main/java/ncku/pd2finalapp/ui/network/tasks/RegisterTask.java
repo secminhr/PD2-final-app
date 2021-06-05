@@ -3,7 +3,7 @@ package ncku.pd2finalapp.ui.network.tasks;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-import ncku.pd2finalapp.ui.network.repositories.TaskRepository;
+import ncku.pd2finalapp.ReceiveAndSend.RegisterCheck;
 
 public class RegisterTask extends NetworkTask<Void, RegisterTask.UsernameExistsException> {
 
@@ -19,7 +19,7 @@ public class RegisterTask extends NetworkTask<Void, RegisterTask.UsernameExistsE
 
     @Override
     protected void task() {
-        String response = TaskRepository.current.registerCheckData(username, nickname, password);
+        String response = new RegisterCheck().RegisterCheckData(username, nickname, password);
         onReceive(response);
     }
 

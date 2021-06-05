@@ -1,13 +1,10 @@
 package ncku.pd2finalapp.ui.network.ws;
 
-import java.net.URI;
-
 import ncku.pd2finalapp.ui.map.FortData;
 
 public class FortBloodUpdateClient extends WSClient<FortBloodUpdateClient.BloodUpdate> {
     public FortBloodUpdateClient() {
-        super(URI.create(root + "/websocket/updateBlood"));
-//        super(URI.create("wss://echo.websocket.org"));
+        super("/updateBlood");
     }
 
     @Override

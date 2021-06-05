@@ -4,14 +4,14 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import ncku.pd2finalapp.ReceiveAndSend.InfoCheck;
 import ncku.pd2finalapp.ui.info.UserInfo;
-import ncku.pd2finalapp.ui.network.repositories.TaskRepository;
 
 public class InfoTask extends NetworkTask<UserInfo, NoException> {
 
     @Override
     protected void task() {
-        String response = TaskRepository.current.infoCheckData();
+        String response = new InfoCheck().InfoCheckData();
         onReceive(response);
     }
 

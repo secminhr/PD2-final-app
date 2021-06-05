@@ -4,7 +4,7 @@ import com.google.android.gms.maps.model.LatLng;
 
 import java.util.List;
 
-import ncku.pd2finalapp.ui.network.repositories.TaskRepository;
+import ncku.pd2finalapp.ReceiveAndSend.AttackCheck;
 
 public class SendAttackTask extends NetworkTask<Void, NoException> {
 
@@ -19,7 +19,7 @@ public class SendAttackTask extends NetworkTask<Void, NoException> {
 
     @Override
     protected void task() {
-        TaskRepository.current.sendAttackData(points, duration, target);
+        new AttackCheck().sendAttackData(points, duration, target);
         //This will just success since login is required to reach here
         onSuccess(null);
     }

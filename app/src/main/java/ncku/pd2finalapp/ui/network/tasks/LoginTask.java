@@ -3,7 +3,7 @@ package ncku.pd2finalapp.ui.network.tasks;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
-import ncku.pd2finalapp.ui.network.repositories.TaskRepository;
+import ncku.pd2finalapp.ReceiveAndSend.LoginCheck;
 
 public class LoginTask extends NetworkTask<Void, LoginTask.LoginFailedException> {
 
@@ -17,7 +17,7 @@ public class LoginTask extends NetworkTask<Void, LoginTask.LoginFailedException>
 
     @Override
     protected void task() {
-        String response = TaskRepository.current.loginCheckData(username, password);
+        String response = new LoginCheck().LoginCheckData(username, password);
         onReceive(response);
     }
 

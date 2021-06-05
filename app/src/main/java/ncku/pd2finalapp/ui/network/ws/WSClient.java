@@ -17,26 +17,24 @@ import java.util.function.Consumer;
 import ncku.pd2finalapp.ReceiveAndSend.ReceiveInfoFromBack;
 
 public abstract class WSClient<Message> {
+    private final URI uri;
     private Client client;
     private Consumer<Message> onMessageListener = (message) -> {};
-    protected static String root = "ws://cryptic-island-19755.herokuapp.com";
+    protected static String root = "ws://cryptic-island-19755.herokuapp.com/websocket";
 
-    protected WSClient(URI uri) {
+    protected WSClient(String endpoint) {
+        uri = URI.create(root + endpoint);
         client = new Client(uri);
-        client.setOnCloseListener((remote) -> {
-            if (remote) { //connection somehow closed by remote, reconnect
-                reconnect(uri);
-            }
-        });
+    }
+
+    private void onWebSocketClose(boolean remote) {
+        if (remote) { //connection somehow closed by remote, reconnect
+            reconnect(uri);
+        }
     }
 
     private void reconnect(URI uri) {
         client = new Client(uri);
-        client.setOnCloseListener((remote) -> {
-            if (remote) {
-                reconnect(uri);
-            }
-        });
         client.connect();
     }
 
@@ -83,16 +81,11 @@ public abstract class WSClient<Message> {
             onMessageListener.accept(m);
         }
 
-        private Consumer<Boolean> onClose = (remote) -> {};
-        void setOnCloseListener(Consumer<Boolean> onClose) {
-            this.onClose = onClose;
-        }
-
         @Override
         public void onClose(int code, String reason, boolean remote) {
             Log.e("WSClient", "onClose");
             Log.e("WSClient", reason);
-            onClose.accept(remote);
+            onWebSocketClose(remote);
         }
 
         @Override
