@@ -8,21 +8,11 @@ public class UserInfo {
         return username;
     }
 
-    public int getExp() {
-        return status.exp;
-    }
-
-    public int getLevel() {
-        return status.level;
-    }
-
     public String getNickname() {
         return status.nickname;
     }
 
     static class Status {
-        private int exp;
-        private int level;
         private String nickname;
     }
 }

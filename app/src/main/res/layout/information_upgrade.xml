@@ -63,24 +63,6 @@
         app:layout_constraintTop_toBottomOf="@+id/Name" />
 
     <TextView
-        android:id="@+id/textView8"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="24dp"
-        android:background="@drawable/shape_info_texttitle"
-        android:padding="8dp"
-        android:paddingStart="16dp"
-        android:paddingEnd="16dp"
-        android:text="status"
-        android:textAlignment="center"
-        android:textColor="#FFFFFF"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="@+id/textView2"
-        app:layout_constraintStart_toStartOf="@+id/textView2"
-        app:layout_constraintTop_toBottomOf="@+id/textView2" />
-
-    <TextView
         android:id="@+id/nicknamestore"
         android:layout_width="0dp"
         android:layout_height="0dp"
@@ -95,21 +77,6 @@
         app:layout_constraintEnd_toEndOf="@+id/namestore"
         app:layout_constraintStart_toStartOf="@+id/namestore"
         app:layout_constraintTop_toTopOf="@+id/textView2" />
-
-    <TextView
-        android:id="@+id/statusstore"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:background="@drawable/shape_info_textfield"
-        android:padding="8dp"
-        android:textAlignment="center"
-        android:textColor="#FFFFFF"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@+id/textView8"
-        app:layout_constraintEnd_toEndOf="@+id/nicknamestore"
-        app:layout_constraintStart_toStartOf="@+id/nicknamestore"
-        app:layout_constraintTop_toTopOf="@+id/textView8" />
 
     <ImageView
         android:id="@+id/imageView"

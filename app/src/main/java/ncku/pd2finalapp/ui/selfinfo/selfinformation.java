@@ -1,9 +1,7 @@
 package ncku.pd2finalapp.ui.selfinfo;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -14,10 +12,7 @@ import ncku.pd2finalapp.ui.network.Network;
 
 public class selfinformation extends AppCompatActivity {
     String name = "temp";
-    String level = "temp";
     String nickname = "temp";
-    String exp = "temp";
-    String status = "none";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -27,23 +22,15 @@ public class selfinformation extends AppCompatActivity {
         Network.getUserInfo()
                 .setOnSuccessCallback(info -> {
                     name = info.getUsername();
-                    level = Integer.toString(info.getLevel());
                     nickname = info.getNickname();
-                    exp = Integer.toString(info.getExp());
                     showall();
-
-                })
-                .setOnFailureCallback(exception -> {
-                    Log.e("name","erro");
-                    // this should never happen because it's NoException
-                    //but in case you want to know how to handle error
                 })
                 .execute();
     }
 
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
+        if (item.getItemId() == android.R.id.home) { //back button
             finish();
             return true;
         }
@@ -59,18 +46,8 @@ public class selfinformation extends AppCompatActivity {
         text1.setText(nickname);
     }
 
-    public void showstatus(){
-        TextView text1 = findViewById(R.id.statusstore);
-        text1.setText(status);
-    }
-
-    public void ChangeToMap(View v){
-        finish();
-    }
-
     public void showall(){
         showname();
         shownickname();
-        showstatus();
     }
 }
