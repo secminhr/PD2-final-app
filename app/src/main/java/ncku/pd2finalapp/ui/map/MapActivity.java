@@ -214,7 +214,7 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
                         .icon(BitmapDescriptorFactory.fromBitmap(markerBitmap))
         );
         map.animateCamera(CameraUpdateFactory.newLatLngZoom(current, 19));
-        getSupportActionBar().setTitle("PD2FinalApp");
+        getSupportActionBar().setTitle(R.string.app_name);
         requestLocationUpdate();
         ExtendedFloatingActionButton fab = findViewById(R.id.fab);
         fab.setVisibility(View.VISIBLE);
