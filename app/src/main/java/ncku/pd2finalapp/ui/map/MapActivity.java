@@ -9,6 +9,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -104,13 +105,13 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
         bottomSheet = BottomSheetBehavior.from(sheet);
         bottomSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
 
-        fortBloodChangeClient = Network.bloodUpdateClient().setOnReceiveMessageListener((update) -> {
+        fortBloodChangeClient = Network.bloodUpdateClient().setOnReceiveMessageListener(update -> {
             for(Marker fortMarker: fortMarkers) {
                 update.update((FortData) fortMarker.getTag());
             }
             markForts(
                 fortMarkers.stream()
-                        .map((marker) -> (FortData) marker.getTag())
+                        .map(marker -> (FortData) marker.getTag())
                         .collect(Collectors.toList())
             );
 
@@ -130,12 +131,13 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.map_menu, menu);
-        menu.getItem(0).setOnMenuItemClickListener(menuItem -> {
-            ChangeToInfo();
-            return true;
-        });
-
         return true;
+    }
+
+    public void ChangeToInfo(MenuItem item){
+        Intent intent = new Intent();
+        intent.setClass(MapActivity.this, selfinformation.class);
+        startActivity(intent);
     }
 
     @Override
@@ -165,18 +167,9 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
     }
 
     private void markForts(List<FortData> forts) {
-        for (Marker existedMarker: fortMarkers) {
-            existedMarker.remove();
-        }
-        fortMarkers.clear();
+        clearFortMarkers();
         for (FortData fort: forts) {
-            Marker marker = map.addMarker(
-                new MarkerOptions()
-                    .icon(getFortBitmapDescriptor(this, fort))
-                    .position(fort.getFortPosition())
-                    .anchor(0.5f, 0.5f)
-            );
-            marker.setTag(fort);
+            Marker marker = createFortMarker(fort);
             fortMarkers.add(marker);
             map.addCircle(new CircleOptions()
                     .center(fort.getFortPosition())
@@ -185,6 +178,24 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
                     .fillColor(Color.argb(80, 255, 0, 0))
             );
         }
+    }
+
+    private void clearFortMarkers() {
+        for (Marker existedMarker: fortMarkers) {
+            existedMarker.remove();
+        }
+        fortMarkers.clear();
+    }
+
+    private Marker createFortMarker(FortData fort) {
+        Marker marker = map.addMarker(
+                new MarkerOptions()
+                        .icon(getFortBitmapDescriptor(this, fort))
+                        .position(fort.getFortPosition())
+                        .anchor(0.5f, 0.5f)
+        );
+        marker.setTag(fort);
+        return marker;
     }
 
     private final LocationPermissionHelper permissionHelper = new LocationPermissionHelper(this).onUserDeny(() -> {
@@ -389,11 +400,6 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
                 walkedPath.setPoints(points);
             }
         }
-    }
-    public void ChangeToInfo(){
-        Intent intent = new Intent();
-        intent.setClass(MapActivity.this, selfinformation.class);
-        startActivity(intent);
     }
 
     @Override

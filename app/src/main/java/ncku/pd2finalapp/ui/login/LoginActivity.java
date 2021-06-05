@@ -7,8 +7,6 @@ import android.os.Handler;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
-import android.widget.EditText;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.MapView;
@@ -19,7 +17,7 @@ import java.net.CookieManager;
 import java.net.CookiePolicy;
 
 import androidx.appcompat.app.AppCompatActivity;
-import ncku.pd2finalapp.R;
+import ncku.pd2finalapp.databinding.ActivityLoginBinding;
 import ncku.pd2finalapp.ui.map.MapActivity;
 import ncku.pd2finalapp.ui.network.CookieStore;
 import ncku.pd2finalapp.ui.network.Network;
@@ -29,24 +27,24 @@ import static ncku.pd2finalapp.ui.login.TextFieldTool.isEmpty;
 
 public class LoginActivity extends AppCompatActivity {
 
+    private ActivityLoginBinding binding;
     private TextInputLayout usernameInput, passwordInput;
     public static final String USERNAME_EXTRA = "username";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        binding = ActivityLoginBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
 
         //setup cookie store at start
         CookieHandler.setDefault(new CookieManager(new CookieStore(this), CookiePolicy.ACCEPT_ORIGINAL_SERVER));
-        usernameInput = findViewById(R.id.usernameInput);
-        passwordInput = findViewById(R.id.passwordInput);
+        usernameInput = binding.usernameInput;
+        passwordInput = binding.passwordInput;
 
-        EditText passwordEditText = findViewById(R.id.passwordEditText);
-        EditText usernameEditText = findViewById(R.id.usernameEditText);
-        usernameEditText.setOnFocusChangeListener(new ClearErrorOnFocus(usernameInput));
-        passwordEditText.setOnFocusChangeListener(new ClearErrorOnFocus(passwordInput));
-        passwordEditText.setOnEditorActionListener(this::OnPasswordDoneClicked);
+        binding.usernameEditText.setOnFocusChangeListener(new ClearErrorOnFocus(usernameInput));
+        binding.passwordEditText.setOnFocusChangeListener(new ClearErrorOnFocus(passwordInput));
+        binding.passwordEditText.setOnEditorActionListener(this::OnPasswordDoneClicked);
     }
 
     public void onRegisterClicked(View registerButton) {
@@ -104,17 +102,16 @@ public class LoginActivity extends AppCompatActivity {
         }
 
         new Handler().postDelayed(() -> {
-            ProgressBar progressBar = findViewById(R.id.loginProgressBar);
             MapView mapView = new MapView(this);
-            progressBar.setProgress(30, true);
+            binding.loginProgressBar.setProgress(30, true);
             mapView.onCreate(null);
-            progressBar.setProgress(60, true);
+            binding.loginProgressBar.setProgress(60, true);
 
             Network.login(getStringFromInput(usernameInput), getStringFromInput(passwordInput))
                     .setOnSuccessCallback((result) -> onLoginSuccess()) //result is always null,
                     .setOnFailureCallback(this::onLoginFailed)
                     .execute();
-        }, 1000);
+        }, 500);
     }
 
     private void onLoginSuccess() {
@@ -131,6 +128,6 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void setLoginState(LoginState state) {
-        state.updateViewWhenSet(findViewById(R.id.loginButton), findViewById(R.id.loginProgressBar));
+        state.updateView(binding);
     }
 }

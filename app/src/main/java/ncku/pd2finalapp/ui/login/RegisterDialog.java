@@ -9,19 +9,17 @@ import ncku.pd2finalapp.R;
 
 class RegisterDialog extends FrameLayout {
 
-    private final TextInputLayout username;
-    private final TextInputLayout nickname;
-    private final TextInputLayout password;
     private final TextInputLayout[] inputs;
 
     RegisterDialog(Context context) {
         super(context);
         inflate(getContext(), R.layout.dialog_register, this);
 
-        username = findViewById(R.id.usernameInput);
-        nickname = findViewById(R.id.nicknameInput);
-        password = findViewById(R.id.passwordInput);
-        inputs = new TextInputLayout[] { username, nickname, password };
+        inputs = new TextInputLayout[] {
+                findViewById(R.id.usernameInput),
+                findViewById(R.id.nicknameInput),
+                findViewById(R.id.passwordInput)
+        };
 
         for (TextInputLayout input: inputs) {
             input.addOnEditTextAttachedListener(inputLayout ->
@@ -42,18 +40,17 @@ class RegisterDialog extends FrameLayout {
     }
 
     void showErrorOnUsername(Exception e) {
-        TextInputLayout usernameInput = findViewById(R.id.usernameInput);
-        usernameInput.setError(e.getMessage());
+        inputs[0].setError(e.getMessage());
     }
 
     String getUsername() {
-        return username.getEditText().getText().toString();
+        return inputs[0].getEditText().getText().toString();
     }
     String getNickname() {
-        return nickname.getEditText().getText().toString();
+        return inputs[1].getEditText().getText().toString();
     }
     String getPassword() {
-        return password.getEditText().getText().toString();
+        return inputs[2].getEditText().getText().toString();
     }
 
 }

@@ -13,14 +13,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
 
 import ncku.pd2finalapp.ReceiveAndSend.ReceiveInfoFromBack;
 
 public abstract class WSClient<Message> {
     private Client client;
     private Consumer<Message> onMessageListener = (message) -> {};
-    protected static String root = "ws://afraid-bullfrog-13.loca.lt";
+    protected static String root = "ws://cryptic-island-19755.herokuapp.com";
 
     protected WSClient(URI uri) {
         client = new Client(uri);
@@ -63,7 +62,7 @@ public abstract class WSClient<Message> {
                     Map<String, List<String>> cookies = new HashMap<>();
                     cookies = CookieHandler.getDefault().get(new URI(ReceiveInfoFromBack.network), cookies);
 
-                    this.put("Cookie", cookies.get("Cookie").stream().collect(Collectors.joining("; ")));
+                    this.put("Cookie", String.join("; ", cookies.get("Cookie")));
                 } catch (IOException|URISyntaxException e) {
                     e.printStackTrace();
                 }
