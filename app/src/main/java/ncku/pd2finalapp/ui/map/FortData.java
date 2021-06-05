@@ -12,7 +12,7 @@ public class FortData {
     private final LatLng position;
     private final int maxHp;
     private final int hp;
-    private ArrayList<Timer> attackTimers = new ArrayList<>();
+    private final ArrayList<Timer> attackTimers = new ArrayList<>();
 
     public FortData(LatLng position, int maxHp) {
         this.position = position;

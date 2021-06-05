@@ -10,7 +10,7 @@ import android.widget.TextView;
 class Timer extends CountDownTimer {
 
     private final TextView timer;
-    private OnFinishListener onFinish = () -> {};
+    private Block onFinish = () -> {};
 
     Timer(long millisInFuture, long countDownInterval, Context context) {
         super(millisInFuture, countDownInterval);
@@ -25,7 +25,7 @@ class Timer extends CountDownTimer {
         return timer;
     }
 
-    public void setOnFinish(OnFinishListener onFinish) {
+    public void setOnFinish(Block onFinish) {
         this.onFinish = onFinish;
     }
 
@@ -34,11 +34,6 @@ class Timer extends CountDownTimer {
     }
 
     public void onFinish() {
-        onFinish.onFinish();
-    }
-
-    @FunctionalInterface
-    interface OnFinishListener {
-        void onFinish();
+        onFinish.execute();
     }
 }

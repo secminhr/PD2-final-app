@@ -2,8 +2,6 @@ package ncku.pd2finalapp.ui.network;
 
 import com.google.android.gms.maps.model.LatLng;
 
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.List;
 
 import ncku.pd2finalapp.ui.info.UserInfo;
@@ -15,6 +13,10 @@ import ncku.pd2finalapp.ui.network.tasks.NetworkTask;
 import ncku.pd2finalapp.ui.network.tasks.NoException;
 import ncku.pd2finalapp.ui.network.tasks.RegisterTask;
 import ncku.pd2finalapp.ui.network.tasks.SendAttackTask;
+import ncku.pd2finalapp.ui.network.ws.EndGameClient;
+import ncku.pd2finalapp.ui.network.ws.FortBloodUpdateClient;
+import ncku.pd2finalapp.ui.network.ws.RestartReadyClient;
+import ncku.pd2finalapp.ui.network.ws.WSClient;
 
 //Provide an interface to interact with networking part in a non-blocking way
 public class Network {
@@ -34,15 +36,22 @@ public class Network {
         return new GetFortDataTask();
     }
 
-    public static WSClient createWebSocketConnection(String endpoint) {
-        String uri = "ws://wet-zebra-74.loca.lt" + endpoint;
+    public static WSClient<FortBloodUpdateClient.BloodUpdate> bloodUpdateClient() {
+        return tryConnect(new FortBloodUpdateClient());
+    }
+
+    public static WSClient<Void> endGameClient() {
+        return tryConnect(new EndGameClient());
+    }
+
+    public static WSClient<Void> restartClient() {
+        return tryConnect(new RestartReadyClient());
+    }
+
+    private static<T> WSClient<T> tryConnect(WSClient<T> client) {
         try {
-            URI server = new URI(uri);
-            WSClient client = new WSClient(server);
             client.connectBlocking();
             return client;
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

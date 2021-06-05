@@ -42,7 +42,9 @@ import com.google.android.material.floatingactionbutton.ExtendedFloatingActionBu
 
 import java.time.Duration;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -50,7 +52,8 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.ContextCompat;
 import ncku.pd2finalapp.R;
 import ncku.pd2finalapp.ui.network.Network;
-import ncku.pd2finalapp.ui.network.WSClient;
+import ncku.pd2finalapp.ui.network.ws.FortBloodUpdateClient;
+import ncku.pd2finalapp.ui.network.ws.WSClient;
 import ncku.pd2finalapp.ui.selfinfo.selfinformation;
 
 import static ncku.pd2finalapp.ui.map.MarkerTool.getFortBitmap;
@@ -62,14 +65,14 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
     private GoogleMap map;
     private Polyline walkedPath;
     private Marker currentMarker;
-    private List<FortData> forts;
+    private ArrayList<Marker> fortMarkers = new ArrayList<>();
 
     private BottomSheetBehavior<ConstraintLayout> bottomSheet;
 
     //note: there will be 3
-    private WSClient fortBloodChangeClient = null;
-    private WSClient gameEndClient = null;
-    private WSClient readyForRestartClient = null;
+    private WSClient<FortBloodUpdateClient.BloodUpdate> fortBloodChangeClient = null;
+    private WSClient<Void> gameEndClient = null;
+    private WSClient<Void> readyForRestartClient = null;
 
     private boolean isRecording = false;
     private LocalTime startRecordingTime = null;
@@ -87,6 +90,7 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
         setContentView(R.layout.activity_map);
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.mapFragment);
+
         mapFragment.getMapAsync(map -> {
             this.map = map;
             map.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style));
@@ -95,13 +99,32 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
             mapState.setMapReady();
         });
         mapFragment.getView().getViewTreeObserver().addOnGlobalLayoutListener(mapState::setViewRendered);
+
         ConstraintLayout sheet = findViewById(R.id.bottomSheet);
         bottomSheet = BottomSheetBehavior.from(sheet);
         bottomSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
 
-        fortBloodChangeClient = Network.createWebSocketConnection("/websocket/updateBlood");
-        gameEndClient = Network.createWebSocketConnection("/websocket/checkgame");
-        readyForRestartClient = Network.createWebSocketConnection("/websocket/renew");
+        fortBloodChangeClient = Network.bloodUpdateClient().setOnReceiveMessageListener((update) -> {
+            for(Marker fortMarker: fortMarkers) {
+                update.update((FortData) fortMarker.getTag());
+            }
+            markForts(
+                fortMarkers.stream()
+                        .map((marker) -> (FortData) marker.getTag())
+                        .collect(Collectors.toList())
+            );
+
+        });
+        gameEndClient = Network.endGameClient().setOnReceiveMessageListener((Null) -> {
+            runOnUiThread(() -> {
+                ConstraintLayout gameEndLayout = findViewById(R.id.gameEndView);
+                gameEndLayout.setVisibility(View.VISIBLE);
+            });
+        });
+
+        readyForRestartClient = Network.restartClient().setOnReceiveMessageListener((Null) -> {
+            runOnUiThread(this::recreate);
+        });
     }
 
     @Override
@@ -111,6 +134,7 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
             ChangeToInfo();
             return true;
         });
+
         return true;
     }
 
@@ -119,6 +143,12 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
         super.onDestroy();
         if (fortBloodChangeClient != null) {
             fortBloodChangeClient.close();
+        }
+        if (gameEndClient != null) {
+            gameEndClient.close();
+        }
+        if (readyForRestartClient != null) {
+            readyForRestartClient.close();
         }
     }
 
@@ -130,14 +160,15 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
 
     private void fetchAndMarkForts() {
         Network.getFortsData()
-                .setOnSuccessCallback((data) -> {
-                    forts = data;
-                    markForts();
-                })
+                .setOnSuccessCallback(this::markForts)
                 .execute();
     }
 
-    private void markForts() {
+    private void markForts(List<FortData> forts) {
+        for (Marker existedMarker: fortMarkers) {
+            existedMarker.remove();
+        }
+        fortMarkers.clear();
         for (FortData fort: forts) {
             Marker marker = map.addMarker(
                 new MarkerOptions()
@@ -146,6 +177,7 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
                     .anchor(0.5f, 0.5f)
             );
             marker.setTag(fort);
+            fortMarkers.add(marker);
             map.addCircle(new CircleOptions()
                     .center(fort.getFortPosition())
                     .radius(20)
@@ -283,7 +315,7 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
             FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(this);
             LocationRequest request = LocationRequest.create()
                     .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                    .setInterval(5000);
+                    .setInterval(2000);
             client.requestLocationUpdates(request, new CurrentLocationCallback(), getMainLooper());
         });
     }

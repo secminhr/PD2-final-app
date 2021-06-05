@@ -1,4 +1,4 @@
-package ncku.pd2finalapp.ui.network;
+package ncku.pd2finalapp.ui.network.ws;
 
 import android.util.Log;
 
@@ -17,12 +17,28 @@ import java.util.stream.Collectors;
 
 import ncku.pd2finalapp.ReceiveAndSend.ReceiveInfoFromBack;
 
-public class WSClient {
+public abstract class WSClient<Message> {
+    private Client client;
+    private Consumer<Message> onMessageListener = (message) -> {};
+    protected static String root = "ws://afraid-bullfrog-13.loca.lt";
 
-    private final Client client;
-    private Consumer<String> onMessageListener = (message) -> {};
-    public WSClient(URI uri) {
+    protected WSClient(URI uri) {
         client = new Client(uri);
+        client.setOnCloseListener((remote) -> {
+            if (remote) { //connection somehow closed by remote, reconnect
+                reconnect(uri);
+            }
+        });
+    }
+
+    private void reconnect(URI uri) {
+        client = new Client(uri);
+        client.setOnCloseListener((remote) -> {
+            if (remote) {
+                reconnect(uri);
+            }
+        });
+        client.connect();
     }
 
     public boolean connectBlocking() throws InterruptedException {
@@ -33,12 +49,14 @@ public class WSClient {
         client.close();
     }
 
-    public WSClient setOnReceiveMessageListener(Consumer<String> listener) {
+    protected abstract Message onReceiveString(String content);
+    public WSClient<Message> setOnReceiveMessageListener(Consumer<Message> listener) {
         onMessageListener = listener;
         return this;
     }
 
-    private class Client extends WebSocketClient {
+    protected class Client extends WebSocketClient {
+
         private Client(URI uri) {
             super(uri, new HashMap<String, String>() {{
                 try {
@@ -62,13 +80,20 @@ public class WSClient {
         public void onMessage(String message) {
             Log.e("WSClient", "onMessage");
             Log.e("WSClient", message);
-            onMessageListener.accept(message);
+            Message m = onReceiveString(message);
+            onMessageListener.accept(m);
+        }
+
+        private Consumer<Boolean> onClose = (remote) -> {};
+        void setOnCloseListener(Consumer<Boolean> onClose) {
+            this.onClose = onClose;
         }
 
         @Override
         public void onClose(int code, String reason, boolean remote) {
             Log.e("WSClient", "onClose");
             Log.e("WSClient", reason);
+            onClose.accept(remote);
         }
 
         @Override

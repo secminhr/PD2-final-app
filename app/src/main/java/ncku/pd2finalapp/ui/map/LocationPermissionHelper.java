@@ -12,19 +12,15 @@ import androidx.core.content.ContextCompat;
 class LocationPermissionHelper {
 
     private final ActivityResultLauncher<String> permissionLauncher;
-    private Block suspendedBlock = null;
-    private Block onUserDenyBlock = null;
+    private Block suspendedBlock = () -> {};
+    private Block onUserDenyBlock = () -> {};
 
     LocationPermissionHelper(ComponentActivity activity) {
         this.permissionLauncher = activity.registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
             if (granted) {
-                if (suspendedBlock != null) {
-                    suspendedBlock.execute();
-                }
+                suspendedBlock.execute();
             } else {
-                if (onUserDenyBlock != null) {
-                    onUserDenyBlock.execute();
-                }
+                onUserDenyBlock.execute();
             }
         });
     }
