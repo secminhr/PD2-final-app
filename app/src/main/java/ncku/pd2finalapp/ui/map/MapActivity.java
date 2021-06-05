@@ -57,9 +57,9 @@ import ncku.pd2finalapp.ui.network.ws.FortBloodUpdateClient;
 import ncku.pd2finalapp.ui.network.ws.WSClient;
 import ncku.pd2finalapp.ui.selfinfo.selfinformation;
 
+import static ncku.pd2finalapp.ui.map.MarkerTool.getCurrentMarkerBitmap;
 import static ncku.pd2finalapp.ui.map.MarkerTool.getFortBitmap;
 import static ncku.pd2finalapp.ui.map.MarkerTool.getFortBitmapDescriptor;
-import static ncku.pd2finalapp.ui.map.MarkerTool.getMarkerBitmap;
 
 public class MapActivity extends AppCompatActivity implements OnSuccessListener<Location> {
 
@@ -217,7 +217,7 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
     @Override
     public void onSuccess(Location location) {
         LatLng current = new LatLng(location.getLatitude(), location.getLongitude());
-        Bitmap markerBitmap = getMarkerBitmap(this, R.drawable.map_marker);
+        Bitmap markerBitmap = getCurrentMarkerBitmap(this);
         currentMarker = map.addMarker(
                 new MarkerOptions()
                         .position(current)

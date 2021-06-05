@@ -25,14 +25,17 @@ class Timer extends CountDownTimer {
         return timer;
     }
 
+    public void onTick(long millisUntilFinished) {
+        long minutes = millisUntilFinished / 1000 / 60;
+        timer.setText(minutes < 1 ?
+                        "Attack will arrive under a minute." :
+                        "Attack will arrive in about " + minutes + " minutes."
+        );
+    }
+
     public void setOnFinish(Block onFinish) {
         this.onFinish = onFinish;
     }
-
-    public void onTick(long millisUntilFinished) {
-        timer.setText("Will be attacked after about " + millisUntilFinished / 1000 + " seconds");
-    }
-
     public void onFinish() {
         onFinish.execute();
     }

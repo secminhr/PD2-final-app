@@ -12,24 +12,9 @@ import androidx.core.content.ContextCompat;
 import ncku.pd2finalapp.R;
 
 class MarkerTool {
-    static Bitmap getMarkerBitmap(Context context, int id) {
-        Drawable drawable = ContextCompat.getDrawable(context, id);
-        Canvas canvas = new Canvas();
-        int width = drawable.getIntrinsicWidth();
-        int height = drawable.getIntrinsicHeight();
-        Bitmap markerBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
-        canvas.setBitmap(markerBitmap);
-        drawable.setBounds(0, 0, width, height);
-        drawable.draw(canvas);
-        return markerBitmap;
-    }
 
-    static void mixBitmapByRatio(Bitmap source, Bitmap mixer, double ratio) {
-        int mixerWidth = (int) (mixer.getWidth() * ratio);
-        int height = source.getHeight();
-        int[] pixels = new int[mixerWidth * height];
-        mixer.getPixels(pixels, 0, mixerWidth, 0, 0, mixerWidth, height);
-        source.setPixels(pixels, 0, mixerWidth, 0, 0, mixerWidth, height);
+    static Bitmap getCurrentMarkerBitmap(Context context) {
+        return getMarkerBitmap(context, R.drawable.map_marker);
     }
 
     static Bitmap getFortBitmap(Context context, FortData fort) {
@@ -41,5 +26,25 @@ class MarkerTool {
 
     static BitmapDescriptor getFortBitmapDescriptor(Context context, FortData fort) {
         return BitmapDescriptorFactory.fromBitmap(getFortBitmap(context, fort));
+    }
+
+    private static Bitmap getMarkerBitmap(Context context, int id) {
+        Drawable drawable = ContextCompat.getDrawable(context, id);
+        Canvas canvas = new Canvas();
+        int width = drawable.getIntrinsicWidth();
+        int height = drawable.getIntrinsicHeight();
+        Bitmap markerBitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888);
+        canvas.setBitmap(markerBitmap);
+        drawable.setBounds(0, 0, width, height);
+        drawable.draw(canvas);
+        return markerBitmap;
+    }
+
+    private static void mixBitmapByRatio(Bitmap source, Bitmap mixer, double ratio) {
+        int mixerWidth = (int) (mixer.getWidth() * ratio);
+        int height = source.getHeight();
+        int[] pixels = new int[mixerWidth * height];
+        mixer.getPixels(pixels, 0, mixerWidth, 0, 0, mixerWidth, height);
+        source.setPixels(pixels, 0, mixerWidth, 0, 0, mixerWidth, height);
     }
 }
