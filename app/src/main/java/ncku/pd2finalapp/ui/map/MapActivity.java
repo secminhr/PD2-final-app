@@ -7,10 +7,13 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
-import android.os.CountDownTimer;
+import android.os.Handler;
 import android.view.Menu;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -23,6 +26,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
@@ -43,6 +47,7 @@ import java.util.List;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.content.ContextCompat;
 import ncku.pd2finalapp.R;
 import ncku.pd2finalapp.ui.network.Network;
 import ncku.pd2finalapp.ui.network.WSClient;
@@ -67,15 +72,6 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
     private WSClient readyForRestartClient = null;
 
     private boolean isRecording = false;
-    private void setRecording(boolean value) {
-        isRecording = value;
-        ExtendedFloatingActionButton button = findViewById(R.id.fab);
-        if (!isRecording) {
-            button.setOnClickListener(this::onStartRecordingClicked);
-        } else {
-            button.setOnClickListener(null);
-        }
-    }
     private LocalTime startRecordingTime = null;
 
     private final MapState mapState = new MapState().onMapViewReady(() -> {
@@ -103,9 +99,9 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
         bottomSheet = BottomSheetBehavior.from(sheet);
         bottomSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
 
-        fortBloodChangeClient = Network.createWebSocketConnection();
-        gameEndClient = Network.createWebSocketConnection();
-        readyForRestartClient = Network.createWebSocketConnection();
+        fortBloodChangeClient = Network.createWebSocketConnection("/websocket/updateBlood");
+        gameEndClient = Network.createWebSocketConnection("/websocket/checkgame");
+        readyForRestartClient = Network.createWebSocketConnection("/websocket/renew");
     }
 
     @Override
@@ -147,8 +143,15 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
                 new MarkerOptions()
                     .icon(getFortBitmapDescriptor(this, fort))
                     .position(fort.getFortPosition())
+                    .anchor(0.5f, 0.5f)
             );
             marker.setTag(fort);
+            map.addCircle(new CircleOptions()
+                    .center(fort.getFortPosition())
+                    .radius(20)
+                    .strokeColor(Color.RED)
+                    .fillColor(Color.argb(80, 255, 0, 0))
+            );
         }
     }
 
@@ -178,17 +181,27 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
                         .title("Current position")
                         .icon(BitmapDescriptorFactory.fromBitmap(markerBitmap))
         );
-        map.animateCamera(CameraUpdateFactory.newLatLng(current));
+        map.animateCamera(CameraUpdateFactory.newLatLngZoom(current, 19));
         getSupportActionBar().setTitle("PD2FinalApp");
         requestLocationUpdate();
+        ExtendedFloatingActionButton fab = findViewById(R.id.fab);
+        fab.setVisibility(View.VISIBLE);
     }
 
-    public void onStartRecordingClicked(View v) {
-        ExtendedFloatingActionButton button = (ExtendedFloatingActionButton) v;
-        button.setIconTint(ColorStateList.valueOf(Color.BLACK));
-        button.setBackgroundColor(Color.WHITE);
-        button.shrink();
+    public void onStartAttackButtonClicked(View v) {
+        ExtendedFloatingActionButton floatingButton = findViewById(R.id.fab);
+        floatingButton.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_baseline_cancel_24));
+        floatingButton.setTextColor(Color.BLACK);
+        floatingButton.setIconTint(ColorStateList.valueOf(Color.BLACK));
+        floatingButton.setBackgroundColor(Color.WHITE);
+        floatingButton.shrink();
+        floatingButton.setOnClickListener((view) -> cancelAttack());
 
+        bottomSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
+        startRecording();
+    }
+
+    private void startRecording() {
         LatLng current = currentMarker.getPosition();
         PolylineOptions firstPoint = new PolylineOptions()
                 .add(current)
@@ -198,33 +211,69 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
                 .jointType(JointType.ROUND)
                 .width(25);
 
-
         walkedPath = map.addPolyline(firstPoint);
-        setRecording(true);
+        isRecording = true;
         startRecordingTime = LocalTime.now();
-
-
     }
 
-    public void onStopRecordingClicked(View v) {
-        ExtendedFloatingActionButton button = (ExtendedFloatingActionButton) v;
-        button.setText("Start Recording");
-        button.setIconResource(R.drawable.ic_baseline_record_24);
-        button.extend();
-        setRecording(false);
-        /*new CountDownTimer(long millisInFuture, long countDownInterval) {
-            TextView text1 = findViewById(R.id.timer);
+    private void cancelAttack() {
+        ExtendedFloatingActionButton floatingButton = findViewById(R.id.fab);
+        floatingButton.setIconTint(ColorStateList.valueOf(Color.WHITE));
+        floatingButton.setBackgroundColor(Color.BLACK);
+        floatingButton.setIcon(ContextCompat.getDrawable(this, R.drawable.sword));
+        floatingButton.setTextColor(Color.WHITE);
+        floatingButton.extend();
+        floatingButton.setOnClickListener(this::onStartAttackButtonClicked);
 
-            public void onTick(long millisUntilFinished) {
-                text1.setText("seconds remaining: " + millisUntilFinished / 1000);
-            }
+        Button attackButton = findViewById(R.id.startAttackButton);
+        attackButton.setEnabled(true);
+        attackButton.setText("Start Attack");
+        attackButton.setOnClickListener(this::onStartAttackButtonClicked);
+        TextView closerMessageTextView = findViewById(R.id.closerMessageTextView);
+        closerMessageTextView.setVisibility(View.GONE);
 
-            public void onFinish() {
-                text1.setText("Attack Finish");
-            }
-        }.start();*/
-        long minutes = Duration.between(startRecordingTime, LocalTime.now()).toMinutes();
+        walkedPath.remove();
+        isRecording = false;
+        startRecordingTime = null;
+    }
 
+    private void attack(FortData fort) {
+        Button attackButton = findViewById(R.id.startAttackButton);
+        attackButton.setVisibility(View.GONE);
+
+        long millis = Duration.between(startRecordingTime, LocalTime.now()).toMillis();
+        ProgressBar attackProgressBar = findViewById(R.id.attackProgressBar);
+        attackProgressBar.setVisibility(View.VISIBLE);
+        Network.sendAttack(walkedPath.getPoints(), millis / 1000 / 60, fort.getFortPosition())
+                .setOnSuccessCallback((result) -> {
+                    ExtendedFloatingActionButton floatingButton = findViewById(R.id.fab);
+                    floatingButton.setIconTint(ColorStateList.valueOf(Color.WHITE));
+                    floatingButton.setBackgroundColor(Color.BLACK);
+                    floatingButton.setIcon(ContextCompat.getDrawable(this, R.drawable.sword));
+                    floatingButton.setTextColor(Color.WHITE);
+                    floatingButton.extend();
+                    floatingButton.setOnClickListener(this::onStartAttackButtonClicked);
+
+                    attackButton.setEnabled(true);
+                    attackButton.setText("Start Attack");
+                    attackButton.setOnClickListener(this::onStartAttackButtonClicked);
+                    attackButton.setVisibility(View.VISIBLE);
+                    TextView closerMessageTextView = findViewById(R.id.closerMessageTextView);
+                    closerMessageTextView.setVisibility(View.GONE);
+                    attackProgressBar.setVisibility(View.GONE);
+
+                    Timer timer = new Timer(millis, 1000, this);
+                    fort.addTimer(timer);
+                    LinearLayout layout = findViewById(R.id.timerList);
+                    fort.setList(layout);
+
+                    new Handler().postDelayed(() -> {
+                        bottomSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
+                    }, 500);
+                })
+                .execute();
+        walkedPath.remove();
+        isRecording = false;
         startRecordingTime = null;
     }
 
@@ -241,20 +290,56 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
 
     public boolean onMarkerClick(Marker marker) {
         if (marker.getTag() != null) {
-            setUpBottomSheet((FortData) marker.getTag());
-            ConstraintLayout sheet = findViewById(R.id.bottomSheet);
-            BottomSheetBehavior<ConstraintLayout> bottomSheet = BottomSheetBehavior.from(sheet);
+            refreshBottomSheet((FortData) marker.getTag());
             bottomSheet.setState(BottomSheetBehavior.STATE_EXPANDED);
             return true;
         }
         return false;
     }
 
-    private void setUpBottomSheet(FortData fort) {
+    private void refreshBottomSheet(FortData fort) {
         ImageView fortImageView = findViewById(R.id.fortImage);
         fortImageView.setImageBitmap(getFortBitmap(this, fort));
         TextView hpTextView = findViewById(R.id.hpTextView);
         hpTextView.setText(fort.getHpRepresentation());
+        LinearLayout layout = findViewById(R.id.timerList);
+        fort.setList(layout);
+
+        if (isRecording) {
+            LatLng lastPosition = walkedPath.getPoints().get(walkedPath.getPoints().size()-1);
+            Location lastLocation = new Location("");
+            lastLocation.setLongitude(lastPosition.longitude);
+            lastLocation.setLatitude(lastPosition.latitude);
+
+            LatLng fortPosition = fort.getFortPosition();
+            Location fortLocation = new Location("");
+            fortLocation.setLongitude(fortPosition.longitude);
+            fortLocation.setLatitude(fortPosition.latitude);
+
+            float distance = lastLocation.distanceTo(fortLocation);
+            if (distance <= 20) {
+                Button attackButton = findViewById(R.id.startAttackButton);
+                attackButton.setVisibility(View.VISIBLE);
+                attackButton.setText("Attack");
+                attackButton.setOnClickListener((view) -> attack(fort));
+                TextView closerMessageTextView = findViewById(R.id.closerMessageTextView);
+                closerMessageTextView.setVisibility(View.GONE);
+            } else {
+                Button attackButton = findViewById(R.id.startAttackButton);
+                attackButton.setVisibility(View.GONE);
+                attackButton.setText("Attack");
+                attackButton.setOnClickListener(null);
+                TextView closerMessageTextView = findViewById(R.id.closerMessageTextView);
+                closerMessageTextView.setVisibility(View.VISIBLE);
+            }
+        } else {
+            Button attackButton = findViewById(R.id.startAttackButton);
+            attackButton.setEnabled(true);
+            attackButton.setText("Start Attack");
+            attackButton.setOnClickListener(this::onStartAttackButtonClicked);
+            TextView closerMessageTextView = findViewById(R.id.closerMessageTextView);
+            closerMessageTextView.setVisibility(View.GONE);
+        }
     }
 
     private class CurrentLocationCallback extends LocationCallback {
@@ -277,5 +362,14 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
         Intent intent = new Intent();
         intent.setClass(MapActivity.this, selfinformation.class);
         startActivity(intent);
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (bottomSheet.getState() == BottomSheetBehavior.STATE_EXPANDED) {
+            bottomSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
+            return;
+        }
+        super.onBackPressed();
     }
 }

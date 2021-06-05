@@ -34,8 +34,8 @@ public class Network {
         return new GetFortDataTask();
     }
 
-    public static WSClient createWebSocketConnection() {
-        String uri = "ws://splendid-dolphin-86.loca.lt/websocket";
+    public static WSClient createWebSocketConnection(String endpoint) {
+        String uri = "ws://wet-zebra-74.loca.lt" + endpoint;
         try {
             URI server = new URI(uri);
             WSClient client = new WSClient(server);

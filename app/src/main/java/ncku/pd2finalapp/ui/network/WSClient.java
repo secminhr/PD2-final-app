@@ -12,15 +12,16 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import ncku.pd2finalapp.ReceiveAndSend.ReceiveInfoFromBack;
 
 public class WSClient {
 
-    private Client client;
+    private final Client client;
+    private Consumer<String> onMessageListener = (message) -> {};
     public WSClient(URI uri) {
-
         client = new Client(uri);
     }
 
@@ -32,7 +33,12 @@ public class WSClient {
         client.close();
     }
 
-    private static class Client extends WebSocketClient {
+    public WSClient setOnReceiveMessageListener(Consumer<String> listener) {
+        onMessageListener = listener;
+        return this;
+    }
+
+    private class Client extends WebSocketClient {
         private Client(URI uri) {
             super(uri, new HashMap<String, String>() {{
                 try {
@@ -56,7 +62,7 @@ public class WSClient {
         public void onMessage(String message) {
             Log.e("WSClient", "onMessage");
             Log.e("WSClient", message);
-            //TODO: deal with message
+            onMessageListener.accept(message);
         }
 
         @Override
