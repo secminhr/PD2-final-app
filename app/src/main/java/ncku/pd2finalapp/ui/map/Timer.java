@@ -5,7 +5,11 @@ import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.CountDownTimer;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
+import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 class Timer extends CountDownTimer {
 
@@ -21,8 +25,13 @@ class Timer extends CountDownTimer {
         timer.setTypeface(null, Typeface.BOLD);
     }
 
-    public TextView getTextView() {
-        return timer;
+    public void clearText() {
+        timer.setText("");
+    }
+
+    public void addToList(LinearLayout layout) {
+        LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
+        layout.addView(timer, layoutParams);
     }
 
     public void onTick(long millisUntilFinished) {

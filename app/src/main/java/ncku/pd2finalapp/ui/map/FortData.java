@@ -5,7 +5,6 @@ import android.widget.LinearLayout;
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
-import static android.widget.LinearLayout.LayoutParams.*;
 
 public class FortData {
 
@@ -36,16 +35,13 @@ public class FortData {
         attackTimers.add(timer);
         timer.setOnFinish(() -> {
             attackTimers.remove(timer);
-            timer.getTextView().setText("");
+            timer.clearText();
         });
         timer.start();
     }
 
     public void setList(LinearLayout list) {
         list.removeAllViews();
-        for (Timer time: attackTimers) {
-            LinearLayout.LayoutParams layoutParams = new LinearLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT);
-            list.addView(time.getTextView(), layoutParams);
-        }
+        attackTimers.forEach(timer -> timer.addToList(list));
     }
 }
