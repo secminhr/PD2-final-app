@@ -282,13 +282,12 @@ public class MapActivity extends AppCompatActivity {
                     Timer timer = new Timer(attackParameter.durationInMillis(), 1000, this);
                     fort.addTimer(timer);
                     fort.setList(binding.timerList);
-
+                    attackParameter.clear();
                     new Handler().postDelayed(() -> {
                         bottomSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
                     }, 500);
                 })
                 .execute();
-        attackParameter.clear();
     }
 
     private void setupBottomSheet(FortData fort) {
