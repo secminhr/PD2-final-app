@@ -1,6 +1,7 @@
 package ncku.pd2finalapp.ui.map;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
 import android.app.Service;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -192,13 +193,15 @@ public class MapActivity extends AppCompatActivity {
         for (FortData fort: forts) {
             Marker marker = createFortMarker(fort);
             fortMarkers.add(marker);
-            map.addCircle(new CircleOptions()
-                    .center(fort.getFortPosition())
-                    .radius(20)
-                    .strokeColor(Color.RED)
-                    .strokeWidth(3f)
-                    .fillColor(Color.argb(80, 255, 0, 0))
-            );
+            if (fort.getHp() != 0) {
+                map.addCircle(new CircleOptions()
+                        .center(fort.getFortPosition())
+                        .radius(20)
+                        .strokeColor(Color.RED)
+                        .strokeWidth(3f)
+                        .fillColor(Color.argb(80, 255, 0, 0))
+                );
+            }
         }
     }
 
@@ -240,6 +243,15 @@ public class MapActivity extends AppCompatActivity {
     }
 
     private void onFirstTimeLocatedCurrent(Location location) {
+        if (location == null) { //gps may not be opened
+            new AlertDialog.Builder(this)
+                    .setTitle("Cannot locate position")
+                    .setMessage("We cannot locate your current position.\nPlease turn on your gps and network if you haven't.")
+                    .setPositiveButton("Done", (dialogInterface, i) -> {
+                        requireMyLocation();
+                    }).show();
+            return;
+        }
         LatLng current = locationToLatLng(location);
         Bitmap markerBitmap = getCurrentMarkerBitmap(this);
         currentMarker = map.addMarker(
