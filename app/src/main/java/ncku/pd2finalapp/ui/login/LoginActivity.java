@@ -25,6 +25,8 @@ import ncku.pd2finalapp.ui.network.Network;
 import static ncku.pd2finalapp.ui.login.TextFieldTool.getStringFromInput;
 import static ncku.pd2finalapp.ui.login.TextFieldTool.isEmpty;
 
+import static ncku.pd2finalapp.ui.login.LoginState.*;
+
 public class LoginActivity extends AppCompatActivity {
 
     private ActivityLoginBinding binding;
@@ -93,11 +95,11 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void login() {
-        setLoginState(LoginState.LOGGING_IN);
+       LoginState.setState(LOGGING_IN, binding);
 
         if (isEmpty(usernameInput, "username must not be empty") |
             isEmpty(passwordInput, "password must not be empty")) {
-            setLoginState(LoginState.IDLE);
+            LoginState.setState(IDLE, binding);
             return;
         }
 
@@ -124,10 +126,6 @@ public class LoginActivity extends AppCompatActivity {
     private void onLoginFailed(Exception exception) {
         usernameInput.setError(exception.getMessage());
         passwordInput.setError(exception.getMessage());
-        setLoginState(LoginState.IDLE);
-    }
-
-    private void setLoginState(LoginState state) {
-        state.updateView(binding);
+        LoginState.setState(IDLE, binding);
     }
 }

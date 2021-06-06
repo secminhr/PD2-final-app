@@ -47,7 +47,7 @@ public abstract class WSClient<Message> {
     }
 
     protected abstract Message onReceiveString(String content);
-    public WSClient<Message> setOnReceiveMessageListener(Consumer<Message> listener) {
+    public WSClient<Message> onReceiveMessage(Consumer<Message> listener) {
         onMessageListener = listener;
         return this;
     }

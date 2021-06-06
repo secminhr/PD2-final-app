@@ -1,6 +1,6 @@
 package ncku.pd2finalapp.ui.network.ws;
 
-import ncku.pd2finalapp.ui.map.FortData;
+import ncku.pd2finalapp.ui.map.model.FortData;
 
 public class FortBloodUpdateClient extends WSClient<FortBloodUpdateClient.BloodUpdate> {
     public FortBloodUpdateClient() {

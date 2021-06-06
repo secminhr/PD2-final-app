@@ -5,7 +5,8 @@ import com.google.android.gms.maps.model.LatLng;
 import java.util.List;
 
 import ncku.pd2finalapp.ui.info.UserInfo;
-import ncku.pd2finalapp.ui.map.FortData;
+import ncku.pd2finalapp.ui.map.model.AttackParameter;
+import ncku.pd2finalapp.ui.map.model.FortData;
 import ncku.pd2finalapp.ui.network.tasks.GetFortDataTask;
 import ncku.pd2finalapp.ui.network.tasks.InfoTask;
 import ncku.pd2finalapp.ui.network.tasks.LoginTask;
@@ -29,8 +30,8 @@ public class Network {
     public static NetworkTask<UserInfo, NoException> getUserInfo() {
         return new InfoTask();
     }
-    public static NetworkTask<Void, NoException> sendAttack(List<LatLng> points,long durationInMinute, LatLng target) {
-        return new SendAttackTask(points, durationInMinute, target);
+    public static NetworkTask<Void, NoException> sendAttack(AttackParameter parameter, LatLng target) {
+        return new SendAttackTask(parameter.getPath(), parameter.durationInMinutes(), target);
     }
     public static NetworkTask<List<FortData>, NoException> getFortsData() {
         return new GetFortDataTask();

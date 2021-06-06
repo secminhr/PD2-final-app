@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import ncku.pd2finalapp.ReceiveAndSend.GetFortData;
-import ncku.pd2finalapp.ui.map.FortData;
+import ncku.pd2finalapp.ui.map.model.FortData;
 
 public class GetFortDataTask extends NetworkTask<List<FortData>, NoException> {
 

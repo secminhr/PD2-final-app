@@ -2,7 +2,6 @@ package ncku.pd2finalapp.ui.map;
 
 import android.annotation.SuppressLint;
 import android.content.Intent;
-import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.location.Location;
@@ -12,13 +11,8 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
@@ -31,18 +25,12 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.android.gms.maps.model.RoundCap;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton;
 
-import java.time.Duration;
-import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,83 +38,44 @@ import java.util.stream.Collectors;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.core.content.ContextCompat;
 import ncku.pd2finalapp.R;
+import ncku.pd2finalapp.databinding.ActivityMapBinding;
+import ncku.pd2finalapp.ui.map.model.AttackParameter;
+import ncku.pd2finalapp.ui.map.model.FortData;
+import ncku.pd2finalapp.ui.map.statecontrolling.MapState;
+import ncku.pd2finalapp.ui.map.statecontrolling.UserState;
+import ncku.pd2finalapp.ui.map.tools.LocationPermissionHelper;
+import ncku.pd2finalapp.ui.map.tools.Timer;
 import ncku.pd2finalapp.ui.network.Network;
 import ncku.pd2finalapp.ui.network.ws.FortBloodUpdateClient;
 import ncku.pd2finalapp.ui.network.ws.WSClient;
 import ncku.pd2finalapp.ui.selfinfo.selfinformation;
 
-import static ncku.pd2finalapp.ui.map.MarkerTool.getCurrentMarkerBitmap;
-import static ncku.pd2finalapp.ui.map.MarkerTool.getFortBitmap;
-import static ncku.pd2finalapp.ui.map.MarkerTool.getFortBitmapDescriptor;
+import static ncku.pd2finalapp.ui.map.tools.MapTool.distanceBetween;
+import static ncku.pd2finalapp.ui.map.tools.MapTool.getCurrentMarkerBitmap;
+import static ncku.pd2finalapp.ui.map.tools.MapTool.getFortBitmap;
+import static ncku.pd2finalapp.ui.map.tools.MapTool.getFortBitmapDescriptor;
+import static ncku.pd2finalapp.ui.map.tools.MapTool.locationToLatLng;
+import static ncku.pd2finalapp.ui.map.tools.MapTool.setupMap;
+import static ncku.pd2finalapp.ui.map.statecontrolling.UserState.Attacking;
+import static ncku.pd2finalapp.ui.map.statecontrolling.UserState.NotRecording;
+import static ncku.pd2finalapp.ui.map.statecontrolling.UserState.SendingAttack;
 
-public class MapActivity extends AppCompatActivity implements OnSuccessListener<Location> {
+public class MapActivity extends AppCompatActivity {
 
     private GoogleMap map;
-    private Polyline walkedPath;
     private Marker currentMarker;
-    private ArrayList<Marker> fortMarkers = new ArrayList<>();
+    private final ArrayList<Marker> fortMarkers = new ArrayList<>();
 
+    private ActivityMapBinding binding;
+
+    private final AttackParameter attackParameter = new AttackParameter();
     private BottomSheetBehavior<ConstraintLayout> bottomSheet;
 
     //note: there will be 3
     private WSClient<FortBloodUpdateClient.BloodUpdate> fortBloodChangeClient = null;
     private WSClient<Void> gameEndClient = null;
     private WSClient<Void> readyForRestartClient = null;
-
-    private boolean isRecording = false;
-    private LocalTime startRecordingTime = null;
-
-    private final MapState mapState = new MapState().onMapViewReady(() -> {
-        moveCamera();
-        fetchAndMarkForts();
-        markCurrent();
-    });
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-
-        setContentView(R.layout.activity_map);
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.mapFragment);
-
-        mapFragment.getMapAsync(map -> {
-            this.map = map;
-            map.setMapStyle(MapStyleOptions.loadRawResourceStyle(this, R.raw.map_style));
-            map.getUiSettings().setMapToolbarEnabled(false);
-            map.setOnMarkerClickListener(this::onMarkerClick);
-            mapState.setMapReady();
-        });
-        mapFragment.getView().getViewTreeObserver().addOnGlobalLayoutListener(mapState::setViewRendered);
-
-        ConstraintLayout sheet = findViewById(R.id.bottomSheet);
-        bottomSheet = BottomSheetBehavior.from(sheet);
-        bottomSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
-
-        fortBloodChangeClient = Network.bloodUpdateClient().setOnReceiveMessageListener(update -> {
-            for(Marker fortMarker: fortMarkers) {
-                update.update((FortData) fortMarker.getTag());
-            }
-            markForts(
-                fortMarkers.stream()
-                        .map(marker -> (FortData) marker.getTag())
-                        .collect(Collectors.toList())
-            );
-
-        });
-        gameEndClient = Network.endGameClient().setOnReceiveMessageListener((Null) -> {
-            runOnUiThread(() -> {
-                ConstraintLayout gameEndLayout = findViewById(R.id.gameEndView);
-                gameEndLayout.setVisibility(View.VISIBLE);
-            });
-        });
-
-        readyForRestartClient = Network.restartClient().setOnReceiveMessageListener((Null) -> {
-            runOnUiThread(this::recreate);
-        });
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -138,6 +87,54 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
         Intent intent = new Intent();
         intent.setClass(MapActivity.this, selfinformation.class);
         startActivity(intent);
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        binding = ActivityMapBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        setupMapFragment();
+
+        bottomSheet = BottomSheetBehavior.from(binding.bottomSheet);
+        bottomSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
+
+        fortBloodChangeClient = Network.bloodUpdateClient().onReceiveMessage(update -> {
+            for(Marker fortMarker: fortMarkers) {
+                update.update((FortData) fortMarker.getTag());
+            }
+            markForts(
+                fortMarkers.stream()
+                        .map(marker -> (FortData) marker.getTag())
+                        .collect(Collectors.toList())
+            );
+        });
+
+        gameEndClient = Network.endGameClient().onReceiveMessage(Null -> {
+            runOnUiThread(() -> binding.gameEndView.setVisibility(View.VISIBLE));
+        });
+
+        readyForRestartClient = Network.restartClient().onReceiveMessage(Null -> {
+            runOnUiThread(this::recreate);
+        });
+    }
+
+    private void setupMapFragment() {
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.mapFragment);
+        mapFragment.getMapAsync(map -> {
+            this.map = map;
+            setupMap(map, this, (marker) -> {
+                if (marker.getTag() != null) {
+                    setupBottomSheet((FortData) marker.getTag());
+                    bottomSheet.setState(BottomSheetBehavior.STATE_EXPANDED);
+                }
+                return marker.getTag() != null;
+            });
+            mapState.setMapReady();
+        });
+        mapFragment.getView().getViewTreeObserver().addOnGlobalLayoutListener(mapState::setViewRendered);
     }
 
     @Override
@@ -154,7 +151,13 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
         }
     }
 
-    private void moveCamera() {
+    private final MapState mapState = new MapState().onMapViewReady(() -> {
+        moveCameraLocatingNCKU();
+        fetchAndMarkForts();
+        markCurrent();
+    });
+
+    private void moveCameraLocatingNCKU() {
         //move camera to fit the campus on screen
         LatLngBounds bounds = new LatLngBounds(new LatLng(22.993063582069528, 120.21391101450412), new LatLng(23.002434, 120.224757));
         map.moveCamera(CameraUpdateFactory.newLatLngBounds(bounds, 0));
@@ -198,7 +201,8 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
         return marker;
     }
 
-    private final LocationPermissionHelper permissionHelper = new LocationPermissionHelper(this).onUserDeny(() -> {
+    private final LocationPermissionHelper permissionHelper =
+            new LocationPermissionHelper(this).onUserDeny(() -> {
         //when user deny the permission request
         Toast.makeText(this, "Sorry, we can't calculate your position if the permission is not granted.", Toast.LENGTH_SHORT).show();
         finish();
@@ -208,15 +212,15 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
     private void markCurrent() {
         permissionHelper.executeWithPermission(this, () -> {
             getSupportActionBar().setTitle("Loading position...");
-            FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(this);
-            client.getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, null).addOnSuccessListener(this);
+            LocationServices
+                    .getFusedLocationProviderClient(this)
+                    .getCurrentLocation(LocationRequest.PRIORITY_HIGH_ACCURACY, null)
+                    .addOnSuccessListener(this::onFirstTimeLocatedCurrent);
         });
     }
 
-    //On successfully retrieved user's current location first time
-    @Override
-    public void onSuccess(Location location) {
-        LatLng current = new LatLng(location.getLatitude(), location.getLongitude());
+    private void onFirstTimeLocatedCurrent(Location location) {
+        LatLng current = locationToLatLng(location);
         Bitmap markerBitmap = getCurrentMarkerBitmap(this);
         currentMarker = map.addMarker(
                 new MarkerOptions()
@@ -224,27 +228,30 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
                         .title("Current position")
                         .icon(BitmapDescriptorFactory.fromBitmap(markerBitmap))
         );
-        map.animateCamera(CameraUpdateFactory.newLatLngZoom(current, 19));
+        map.animateCamera(CameraUpdateFactory.newLatLngZoom(current, 18.3f));
         getSupportActionBar().setTitle(R.string.app_name);
         requestLocationUpdate();
-        ExtendedFloatingActionButton fab = findViewById(R.id.fab);
-        fab.setVisibility(View.VISIBLE);
+        binding.fab.setVisibility(View.VISIBLE);
+    }
+
+    @SuppressLint("MissingPermission")
+    private void requestLocationUpdate() {
+        permissionHelper.executeWithPermission(this, () -> {
+            LocationRequest request = LocationRequest.create()
+                    .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
+                    .setInterval(2000);
+            LocationServices
+                    .getFusedLocationProviderClient(this)
+                    .requestLocationUpdates(request, new CurrentLocationCallback(), getMainLooper());
+        });
     }
 
     public void onStartAttackButtonClicked(View v) {
-        ExtendedFloatingActionButton floatingButton = findViewById(R.id.fab);
-        floatingButton.setIcon(ContextCompat.getDrawable(this, R.drawable.ic_baseline_cancel_24));
-        floatingButton.setTextColor(Color.BLACK);
-        floatingButton.setIconTint(ColorStateList.valueOf(Color.BLACK));
-        floatingButton.setBackgroundColor(Color.WHITE);
-        floatingButton.shrink();
-        floatingButton.setOnClickListener((view) -> cancelAttack());
-
+        UserState.setState(Attacking, binding);
+        map.animateCamera(CameraUpdateFactory.newLatLngZoom(currentMarker.getPosition(), 18.3f));
+        binding.fab.setOnClickListener(view -> cancelAttack());
         bottomSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
-        startRecording();
-    }
 
-    private void startRecording() {
         LatLng current = currentMarker.getPosition();
         PolylineOptions firstPoint = new PolylineOptions()
                 .add(current)
@@ -254,150 +261,56 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
                 .jointType(JointType.ROUND)
                 .width(25);
 
-        walkedPath = map.addPolyline(firstPoint);
-        isRecording = true;
-        startRecordingTime = LocalTime.now();
+        attackParameter.startRecord(map, firstPoint);
     }
 
-    private void cancelAttack() {
-        ExtendedFloatingActionButton floatingButton = findViewById(R.id.fab);
-        floatingButton.setIconTint(ColorStateList.valueOf(Color.WHITE));
-        floatingButton.setBackgroundColor(Color.BLACK);
-        floatingButton.setIcon(ContextCompat.getDrawable(this, R.drawable.sword));
-        floatingButton.setTextColor(Color.WHITE);
-        floatingButton.extend();
-        floatingButton.setOnClickListener(this::onStartAttackButtonClicked);
-
-        Button attackButton = findViewById(R.id.startAttackButton);
-        attackButton.setEnabled(true);
-        attackButton.setText("Start Attack");
-        attackButton.setOnClickListener(this::onStartAttackButtonClicked);
-        TextView closerMessageTextView = findViewById(R.id.closerMessageTextView);
-        closerMessageTextView.setVisibility(View.GONE);
-
-        walkedPath.remove();
-        isRecording = false;
-        startRecordingTime = null;
+    public void cancelAttack() {
+        UserState.setState(NotRecording, binding);
+        binding.fab.setOnClickListener(this::onStartAttackButtonClicked);
+        attackParameter.clear();
     }
 
-    private void attack(FortData fort) {
-        Button attackButton = findViewById(R.id.startAttackButton);
-        attackButton.setVisibility(View.GONE);
-
-        long millis = Duration.between(startRecordingTime, LocalTime.now()).toMillis();
-        ProgressBar attackProgressBar = findViewById(R.id.attackProgressBar);
-        attackProgressBar.setVisibility(View.VISIBLE);
-        Network.sendAttack(walkedPath.getPoints(), millis / 1000 / 60, fort.getFortPosition())
+    public void attack(FortData fort) {
+        UserState.setState(SendingAttack, binding);
+        attackParameter.stopRecord();
+        Network.sendAttack(attackParameter, fort.getFortPosition())
                 .setOnSuccessCallback((result) -> {
-                    ExtendedFloatingActionButton floatingButton = findViewById(R.id.fab);
-                    floatingButton.setIconTint(ColorStateList.valueOf(Color.WHITE));
-                    floatingButton.setBackgroundColor(Color.BLACK);
-                    floatingButton.setIcon(ContextCompat.getDrawable(this, R.drawable.sword));
-                    floatingButton.setTextColor(Color.WHITE);
-                    floatingButton.extend();
-                    floatingButton.setOnClickListener(this::onStartAttackButtonClicked);
+                    UserState.setState(NotRecording, binding);
+                    binding.fab.setOnClickListener(this::onStartAttackButtonClicked);
+                    binding.startAttackButton.setOnClickListener(this::onStartAttackButtonClicked);
 
-                    attackButton.setEnabled(true);
-                    attackButton.setText("Start Attack");
-                    attackButton.setOnClickListener(this::onStartAttackButtonClicked);
-                    attackButton.setVisibility(View.VISIBLE);
-                    TextView closerMessageTextView = findViewById(R.id.closerMessageTextView);
-                    closerMessageTextView.setVisibility(View.GONE);
-                    attackProgressBar.setVisibility(View.GONE);
-
-                    Timer timer = new Timer(millis, 1000, this);
+                    Timer timer = new Timer(attackParameter.durationInMillis(), 1000, this);
                     fort.addTimer(timer);
-                    LinearLayout layout = findViewById(R.id.timerList);
-                    fort.setList(layout);
+                    fort.setList(binding.timerList);
 
                     new Handler().postDelayed(() -> {
                         bottomSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
                     }, 500);
                 })
                 .execute();
-        walkedPath.remove();
-        isRecording = false;
-        startRecordingTime = null;
+        attackParameter.clear();
     }
 
-    @SuppressLint("MissingPermission")
-    private void requestLocationUpdate() {
-        permissionHelper.executeWithPermission(this, () -> {
-            FusedLocationProviderClient client = LocationServices.getFusedLocationProviderClient(this);
-            LocationRequest request = LocationRequest.create()
-                    .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                    .setInterval(2000);
-            client.requestLocationUpdates(request, new CurrentLocationCallback(), getMainLooper());
-        });
-    }
+    private void setupBottomSheet(FortData fort) {
+        binding.fortImage.setImageBitmap(getFortBitmap(this, fort));
+        binding.hpTextView.setText(fort.getHpRepresentation());
+        fort.setList(binding.timerList);
 
-    public boolean onMarkerClick(Marker marker) {
-        if (marker.getTag() != null) {
-            refreshBottomSheet((FortData) marker.getTag());
-            bottomSheet.setState(BottomSheetBehavior.STATE_EXPANDED);
-            return true;
-        }
-        return false;
-    }
-
-    private void refreshBottomSheet(FortData fort) {
-        ImageView fortImageView = findViewById(R.id.fortImage);
-        fortImageView.setImageBitmap(getFortBitmap(this, fort));
-        TextView hpTextView = findViewById(R.id.hpTextView);
-        hpTextView.setText(fort.getHpRepresentation());
-        LinearLayout layout = findViewById(R.id.timerList);
-        fort.setList(layout);
-
-        if (isRecording) {
-            LatLng lastPosition = walkedPath.getPoints().get(walkedPath.getPoints().size()-1);
-            Location lastLocation = new Location("");
-            lastLocation.setLongitude(lastPosition.longitude);
-            lastLocation.setLatitude(lastPosition.latitude);
-
-            LatLng fortPosition = fort.getFortPosition();
-            Location fortLocation = new Location("");
-            fortLocation.setLongitude(fortPosition.longitude);
-            fortLocation.setLatitude(fortPosition.latitude);
-
-            float distance = lastLocation.distanceTo(fortLocation);
-            if (distance <= 20) {
-                Button attackButton = findViewById(R.id.startAttackButton);
-                attackButton.setVisibility(View.VISIBLE);
-                attackButton.setText("Attack");
-                attackButton.setOnClickListener((view) -> attack(fort));
-                TextView closerMessageTextView = findViewById(R.id.closerMessageTextView);
-                closerMessageTextView.setVisibility(View.GONE);
-            } else {
-                Button attackButton = findViewById(R.id.startAttackButton);
-                attackButton.setVisibility(View.GONE);
-                attackButton.setText("Attack");
-                attackButton.setOnClickListener(null);
-                TextView closerMessageTextView = findViewById(R.id.closerMessageTextView);
-                closerMessageTextView.setVisibility(View.VISIBLE);
-            }
+        if (UserState.current == NotRecording) {
+            binding.startAttackButton.setOnClickListener(this::onStartAttackButtonClicked);
         } else {
-            Button attackButton = findViewById(R.id.startAttackButton);
-            attackButton.setEnabled(true);
-            attackButton.setText("Start Attack");
-            attackButton.setOnClickListener(this::onStartAttackButtonClicked);
-            TextView closerMessageTextView = findViewById(R.id.closerMessageTextView);
-            closerMessageTextView.setVisibility(View.GONE);
-        }
-    }
+            LatLng lastPosition = attackParameter.lastPosition();
+            LatLng fortPosition = fort.getFortPosition();
 
-    private class CurrentLocationCallback extends LocationCallback {
-        @Override
-        public void onLocationResult(@NonNull LocationResult locationResult) {
-            super.onLocationResult(locationResult);
-
-            Location last = locationResult.getLastLocation();
-            LatLng newPoint = new LatLng(last.getLatitude(), last.getLongitude());
-            currentMarker.setPosition(newPoint);
-
-            if (isRecording) {
-                List<LatLng> points = walkedPath.getPoints();
-                points.add(newPoint);
-                walkedPath.setPoints(points);
+            Button attackButton = binding.startAttackButton;
+            if (distanceBetween(lastPosition, fortPosition) <= 20) {
+                attackButton.setText("Attack");
+                attackButton.setVisibility(View.VISIBLE);
+                attackButton.setOnClickListener((view) -> attack(fort));
+                binding.closerMessageTextView.setVisibility(View.GONE);
+            } else {
+                attackButton.setVisibility(View.GONE);
+                binding.closerMessageTextView.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -409,5 +322,18 @@ public class MapActivity extends AppCompatActivity implements OnSuccessListener<
             return;
         }
         super.onBackPressed();
+    }
+
+    private class CurrentLocationCallback extends LocationCallback {
+        @Override
+        public void onLocationResult(@NonNull LocationResult locationResult) {
+            super.onLocationResult(locationResult);
+            LatLng newPoint = locationToLatLng(locationResult.getLastLocation());
+            currentMarker.setPosition(newPoint);
+
+            if (UserState.current == Attacking) {
+                attackParameter.addPosition(newPoint);
+            }
+        }
     }
 }

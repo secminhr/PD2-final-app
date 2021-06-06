@@ -22,4 +22,10 @@ enum LoginState {
     };
 
     abstract void updateView(ActivityLoginBinding binding);
+
+    static LoginState current = LOGGING_IN;
+    static void setState(LoginState state, ActivityLoginBinding binding) {
+        current = state;
+        current.updateView(binding);
+    }
 }

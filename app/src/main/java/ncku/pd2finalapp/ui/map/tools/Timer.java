@@ -1,4 +1,4 @@
-package ncku.pd2finalapp.ui.map;
+package ncku.pd2finalapp.ui.map.tools;
 
 import android.content.Context;
 import android.graphics.Color;
@@ -8,15 +8,17 @@ import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import ncku.pd2finalapp.ui.map.Block;
+
 import static android.view.ViewGroup.LayoutParams.MATCH_PARENT;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
-class Timer extends CountDownTimer {
+public class Timer extends CountDownTimer {
 
     private final TextView timer;
     private Block onFinish = () -> {};
 
-    Timer(long millisInFuture, long countDownInterval, Context context) {
+    public Timer(long millisInFuture, long countDownInterval, Context context) {
         super(millisInFuture, countDownInterval);
         timer = new TextView(context);
         timer.setTextColor(Color.WHITE);

@@ -1,10 +1,13 @@
-package ncku.pd2finalapp.ui.map;
+package ncku.pd2finalapp.ui.map.model;
 
 import android.widget.LinearLayout;
 
 import com.google.android.gms.maps.model.LatLng;
 
 import java.util.ArrayList;
+import java.util.Objects;
+
+import ncku.pd2finalapp.ui.map.tools.Timer;
 
 public class FortData {
 
@@ -43,5 +46,14 @@ public class FortData {
     public void setList(LinearLayout list) {
         list.removeAllViews();
         attackTimers.forEach(timer -> timer.addToList(list));
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        FortData fortData = (FortData) o;
+        return Objects.equals(position, fortData.position);
     }
 }

@@ -1,6 +1,6 @@
 package ncku.pd2finalapp.ui.map;
 
 @FunctionalInterface
-interface Block {
+public interface Block {
     void execute();
 }

@@ -1,4 +1,4 @@
-package ncku.pd2finalapp.ui.map;
+package ncku.pd2finalapp.ui.map.tools;
 
 import android.Manifest;
 import android.content.Context;
@@ -8,14 +8,15 @@ import androidx.activity.ComponentActivity;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.core.content.ContextCompat;
+import ncku.pd2finalapp.ui.map.Block;
 
-class LocationPermissionHelper {
+public class LocationPermissionHelper {
 
     private final ActivityResultLauncher<String> permissionLauncher;
     private Block suspendedBlock = () -> {};
     private Block onUserDenyBlock = () -> {};
 
-    LocationPermissionHelper(ComponentActivity activity) {
+    public LocationPermissionHelper(ComponentActivity activity) {
         this.permissionLauncher = activity.registerForActivityResult(new ActivityResultContracts.RequestPermission(), granted -> {
             if (granted) {
                 suspendedBlock.execute();
@@ -25,12 +26,12 @@ class LocationPermissionHelper {
         });
     }
 
-    LocationPermissionHelper onUserDeny(Block onUserDeny) {
+    public LocationPermissionHelper onUserDeny(Block onUserDeny) {
         onUserDenyBlock = onUserDeny;
         return this;
     }
 
-    void executeWithPermission(Context context, Block block) {
+    public void executeWithPermission(Context context, Block block) {
         if (hasPermission(context)) {
             block.execute();
         } else {
