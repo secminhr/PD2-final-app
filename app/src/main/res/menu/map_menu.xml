@@ -3,6 +3,11 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
+        android:icon="@drawable/ic_baseline_my_location_24"
+        android:onClick="moveCameraToCurrentPosition"
+        android:title="Locate"
+        app:showAsAction="always" />
+    <item
         android:icon="@drawable/ic_baseline_account_circle_24"
         android:onClick="ChangeToInfo"
         android:title="Info"

@@ -17,7 +17,10 @@ import ncku.pd2finalapp.R;
 import ncku.pd2finalapp.ui.map.model.FortData;
 
 public class MapTool {
-    public static void setupMap(GoogleMap map, Context context, GoogleMap.OnMarkerClickListener listener) {
+
+    public static void setupMap(GoogleMap map,
+                                Context context,
+                                GoogleMap.OnMarkerClickListener listener) {
         map.setMapStyle(MapStyleOptions.loadRawResourceStyle(context, R.raw.map_style));
         map.getUiSettings().setMapToolbarEnabled(false);
         map.setOnMarkerClickListener(listener);

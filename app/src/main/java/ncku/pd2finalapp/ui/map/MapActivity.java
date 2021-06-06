@@ -89,6 +89,12 @@ public class MapActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    public void moveCameraToCurrentPosition(MenuItem item) {
+        if (currentMarker != null) {
+            map.animateCamera(CameraUpdateFactory.newLatLng(currentMarker.getPosition()));
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -154,7 +160,7 @@ public class MapActivity extends AppCompatActivity {
     private final MapState mapState = new MapState().onMapViewReady(() -> {
         moveCameraLocatingNCKU();
         fetchAndMarkForts();
-        markCurrent();
+        requireMyLocation();
     });
 
     private void moveCameraLocatingNCKU() {
@@ -208,8 +214,9 @@ public class MapActivity extends AppCompatActivity {
         finish();
     });
 
+
     @SuppressLint("MissingPermission")
-    private void markCurrent() {
+    private void requireMyLocation() {
         permissionHelper.executeWithPermission(this, () -> {
             getSupportActionBar().setTitle("Loading position...");
             LocationServices
