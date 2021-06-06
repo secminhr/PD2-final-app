@@ -12,22 +12,23 @@ import ncku.pd2finalapp.ui.map.tools.Timer;
 public class FortData {
 
     private final LatLng position;
-    private final int maxHp;
-    private final int hp;
+    private final int maxHp = 2500;
+    private int hp;
     private final ArrayList<Timer> attackTimers = new ArrayList<>();
 
-    public FortData(LatLng position, int maxHp) {
+    public FortData(LatLng position, int hp) {
         this.position = position;
-        this.maxHp = maxHp;
-        this.hp = maxHp;
+        this.hp = hp;
     }
 
     public double getHpRatio() {
         return 1.0 * hp / maxHp;
     }
-
     public String getHpRepresentation() {
         return hp + "/" + maxHp;
+    }
+    public void setHp(int hp) {
+        this.hp = hp;
     }
 
     public LatLng getFortPosition() {

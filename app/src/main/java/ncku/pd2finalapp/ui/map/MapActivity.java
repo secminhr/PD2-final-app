@@ -1,12 +1,15 @@
 package ncku.pd2finalapp.ui.map;
 
 import android.annotation.SuppressLint;
+import android.app.Service;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -51,15 +54,15 @@ import ncku.pd2finalapp.ui.network.ws.FortBloodUpdateClient;
 import ncku.pd2finalapp.ui.network.ws.WSClient;
 import ncku.pd2finalapp.ui.selfinfo.selfinformation;
 
+import static ncku.pd2finalapp.ui.map.statecontrolling.UserState.Attacking;
+import static ncku.pd2finalapp.ui.map.statecontrolling.UserState.NotRecording;
+import static ncku.pd2finalapp.ui.map.statecontrolling.UserState.SendingAttack;
 import static ncku.pd2finalapp.ui.map.tools.MapTool.distanceBetween;
 import static ncku.pd2finalapp.ui.map.tools.MapTool.getCurrentMarkerBitmap;
 import static ncku.pd2finalapp.ui.map.tools.MapTool.getFortBitmap;
 import static ncku.pd2finalapp.ui.map.tools.MapTool.getFortBitmapDescriptor;
 import static ncku.pd2finalapp.ui.map.tools.MapTool.locationToLatLng;
 import static ncku.pd2finalapp.ui.map.tools.MapTool.setupMap;
-import static ncku.pd2finalapp.ui.map.statecontrolling.UserState.Attacking;
-import static ncku.pd2finalapp.ui.map.statecontrolling.UserState.NotRecording;
-import static ncku.pd2finalapp.ui.map.statecontrolling.UserState.SendingAttack;
 
 public class MapActivity extends AppCompatActivity {
 
@@ -71,6 +74,8 @@ public class MapActivity extends AppCompatActivity {
 
     private final AttackParameter attackParameter = new AttackParameter();
     private BottomSheetBehavior<ConstraintLayout> bottomSheet;
+
+    private boolean isVibrating = false;
 
     //note: there will be 3
     private WSClient<FortBloodUpdateClient.BloodUpdate> fortBloodChangeClient = null;
@@ -107,14 +112,16 @@ public class MapActivity extends AppCompatActivity {
         bottomSheet.setState(BottomSheetBehavior.STATE_HIDDEN);
 
         fortBloodChangeClient = Network.bloodUpdateClient().onReceiveMessage(update -> {
-            for(Marker fortMarker: fortMarkers) {
-                update.update((FortData) fortMarker.getTag());
-            }
-            markForts(
-                fortMarkers.stream()
-                        .map(marker -> (FortData) marker.getTag())
-                        .collect(Collectors.toList())
-            );
+            runOnUiThread(() -> {
+                for(Marker fortMarker: fortMarkers) {
+                    update.update((FortData) fortMarker.getTag());
+                }
+                markForts(
+                        fortMarkers.stream()
+                                .map(marker -> (FortData) marker.getTag())
+                                .collect(Collectors.toList())
+                );
+            });
         });
 
         gameEndClient = Network.endGameClient().onReceiveMessage(Null -> {
@@ -122,7 +129,12 @@ public class MapActivity extends AppCompatActivity {
         });
 
         readyForRestartClient = Network.restartClient().onReceiveMessage(Null -> {
-            runOnUiThread(this::recreate);
+            //delay it so the message of game ending can be seen
+            runOnUiThread(() -> {
+                new Handler().postDelayed(() -> {
+                    this.recreate();
+                }, 2000);
+            });
         });
     }
 
@@ -184,6 +196,7 @@ public class MapActivity extends AppCompatActivity {
                     .center(fort.getFortPosition())
                     .radius(20)
                     .strokeColor(Color.RED)
+                    .strokeWidth(3f)
                     .fillColor(Color.argb(80, 255, 0, 0))
             );
         }
@@ -339,6 +352,28 @@ public class MapActivity extends AppCompatActivity {
 
             if (UserState.current == Attacking) {
                 attackParameter.addPosition(newPoint);
+            }
+
+            boolean hasEnterFortRegion = false;
+            for(Marker fort: fortMarkers) {
+                float distance = distanceBetween(fort.getPosition(), newPoint);
+                if (distance < 20) {
+                    hasEnterFortRegion = true;
+                    if (!isVibrating) {
+                        isVibrating = true;
+                        Vibrator vibrator = (Vibrator) getApplication().getSystemService(Service.VIBRATOR_SERVICE);
+                        vibrator.vibrate(VibrationEffect.createWaveform(new long[] {
+                                10L, 500L
+                        }, new int[] {
+                                200, 0
+                        }, 0));
+                    }
+                    break;
+                }
+            }
+            if (!hasEnterFortRegion) {
+                Vibrator vibrator = (Vibrator) getApplication().getSystemService(Service.VIBRATOR_SERVICE);
+                vibrator.cancel();
             }
         }
     }
