@@ -54,11 +54,11 @@ public class MapTool {
     }
 
     private static void mixBitmapByRatio(Bitmap source, Bitmap mixer, double ratio) {
-        int mixerWidth = (int) (mixer.getWidth() * ratio);
-        int height = source.getHeight();
-        int[] pixels = new int[mixerWidth * height];
-        mixer.getPixels(pixels, 0, mixerWidth, 0, 0, mixerWidth, height);
-        source.setPixels(pixels, 0, mixerWidth, 0, 0, mixerWidth, height);
+        int mixerHeight = (int) (mixer.getHeight() * ratio);
+        int width = source.getWidth();
+        int[] pixels = new int[width * mixerHeight];
+        mixer.getPixels(pixels, 0, width, 0, 0, width, mixerHeight);
+        source.setPixels(pixels, 0, width, 0, 0, width, mixerHeight);
     }
 
     public static float distanceBetween(LatLng a, LatLng b) {
