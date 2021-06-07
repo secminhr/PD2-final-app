@@ -29,6 +29,7 @@ public enum UserState {
                 attackButton.setVisibility(View.VISIBLE);
 
                 binding.closerMessageTextView.setVisibility(View.GONE);
+                binding.alreadyTakenDownMessage.setVisibility(View.GONE);
                 binding.attackProgressBar.setVisibility(View.GONE);
                 binding.attackProgressBar.setVisibility(View.GONE);
             }
