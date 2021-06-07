@@ -60,6 +60,20 @@
             app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
             <TextView
+                android:id="@+id/alreadyTakenDownMessage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="48dp"
+                android:text="This fort has already been taken down"
+                android:textColor="#C6C6C6"
+                android:visibility="gone"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/timerList" />
+
+            <TextView
                 android:id="@+id/closerMessageTextView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"

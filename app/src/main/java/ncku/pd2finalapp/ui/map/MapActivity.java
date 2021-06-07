@@ -140,12 +140,12 @@ public class MapActivity extends AppCompatActivity {
             });
         });
 
-        Vibrator vibrator = (Vibrator) getApplication().getSystemService(Service.VIBRATOR_SERVICE);
-        vibrator.vibrate(VibrationEffect.createWaveform(new long[] {
-                10L, 500L
-        }, new int[] {
-                200, 0
-        }, 0));
+//        Vibrator vibrator = (Vibrator) getApplication().getSystemService(Service.VIBRATOR_SERVICE);
+//        vibrator.vibrate(VibrationEffect.createWaveform(new long[] {
+//                10L, 500L
+//        }, new int[] {
+//                200, 0
+//        }, 0));
     }
 
     private void setupMapFragment() {
@@ -278,6 +278,7 @@ public class MapActivity extends AppCompatActivity {
                         .position(current)
                         .title("Current position")
                         .icon(BitmapDescriptorFactory.fromBitmap(markerBitmap))
+                        .anchor(0.5f, 0.5f)
         );
         map.animateCamera(CameraUpdateFactory.newLatLngZoom(current, 18.3f));
         getSupportActionBar().setTitle(R.string.app_name);
@@ -353,13 +354,19 @@ public class MapActivity extends AppCompatActivity {
             LatLng fortPosition = fort.getFortPosition();
 
             Button attackButton = binding.startAttackButton;
-            if (distanceBetween(lastPosition, fortPosition) <= 20) {
+            if (fort.getHp() == 0) {
+                attackButton.setVisibility(View.GONE);
+                binding.closerMessageTextView.setVisibility(View.GONE);
+                binding.alreadyTakenDownMessage.setVisibility(View.VISIBLE);
+            } else if (distanceBetween(lastPosition, fortPosition) <= 20) {
                 attackButton.setText("Attack");
                 attackButton.setVisibility(View.VISIBLE);
                 attackButton.setOnClickListener((view) -> attack(fort));
                 binding.closerMessageTextView.setVisibility(View.GONE);
+                binding.alreadyTakenDownMessage.setVisibility(View.GONE);
             } else {
                 attackButton.setVisibility(View.GONE);
+                binding.alreadyTakenDownMessage.setVisibility(View.GONE);
                 binding.closerMessageTextView.setVisibility(View.VISIBLE);
             }
         }
@@ -388,16 +395,18 @@ public class MapActivity extends AppCompatActivity {
             boolean hasEnterFortRegion = false;
             for(Marker fort: fortMarkers) {
                 float distance = distanceBetween(fort.getPosition(), newPoint);
-                if (distance < 20) {
+                if (distance <= 20) {
                     hasEnterFortRegion = true;
-                    if (!isVibrating) {
+                    if (!isVibrating && ((FortData) fort.getTag()).getHp() != 0) {
                         isVibrating = true;
                         Vibrator vibrator = (Vibrator) getApplication().getSystemService(Service.VIBRATOR_SERVICE);
                         vibrator.vibrate(VibrationEffect.createWaveform(new long[] {
                                 10L, 500L
                         }, new int[] {
-                                200, 0
+                                230, 0
                         }, 0));
+                        setupBottomSheet((FortData) fort.getTag());
+                        bottomSheet.setState(BottomSheetBehavior.STATE_EXPANDED);
                     }
                     break;
                 }
@@ -405,6 +414,7 @@ public class MapActivity extends AppCompatActivity {
             if (!hasEnterFortRegion) {
                 Vibrator vibrator = (Vibrator) getApplication().getSystemService(Service.VIBRATOR_SERVICE);
                 vibrator.cancel();
+                isVibrating = false;
             }
         }
     }
