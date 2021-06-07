@@ -25,6 +25,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.Circle;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.JointType;
 import com.google.android.gms.maps.model.LatLng;
@@ -70,6 +71,7 @@ public class MapActivity extends AppCompatActivity {
     private GoogleMap map;
     private Marker currentMarker;
     private final ArrayList<Marker> fortMarkers = new ArrayList<>();
+    private final ArrayList<Circle> fortCircles = new ArrayList<>();
 
     private ActivityMapBinding binding;
 
@@ -137,6 +139,13 @@ public class MapActivity extends AppCompatActivity {
                 }, 2000);
             });
         });
+
+        Vibrator vibrator = (Vibrator) getApplication().getSystemService(Service.VIBRATOR_SERVICE);
+        vibrator.vibrate(VibrationEffect.createWaveform(new long[] {
+                10L, 500L
+        }, new int[] {
+                200, 0
+        }, 0));
     }
 
     private void setupMapFragment() {
@@ -190,17 +199,19 @@ public class MapActivity extends AppCompatActivity {
 
     private void markForts(List<FortData> forts) {
         clearFortMarkers();
+        clearCircles();
         for (FortData fort: forts) {
             Marker marker = createFortMarker(fort);
             fortMarkers.add(marker);
             if (fort.getHp() != 0) {
-                map.addCircle(new CircleOptions()
+                Circle c = map.addCircle(new CircleOptions()
                         .center(fort.getFortPosition())
                         .radius(20)
                         .strokeColor(Color.RED)
                         .strokeWidth(3f)
                         .fillColor(Color.argb(80, 255, 0, 0))
                 );
+                fortCircles.add(c);
             }
         }
     }
@@ -210,6 +221,14 @@ public class MapActivity extends AppCompatActivity {
             existedMarker.remove();
         }
         fortMarkers.clear();
+    }
+
+
+    private void clearCircles() {
+        for (Circle circle: fortCircles) {
+            circle.remove();
+        }
+        fortCircles.clear();
     }
 
     private Marker createFortMarker(FortData fort) {
