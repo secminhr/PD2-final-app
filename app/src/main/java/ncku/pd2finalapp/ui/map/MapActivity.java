@@ -144,7 +144,7 @@ public class MapActivity extends AppCompatActivity {
 //        vibrator.vibrate(VibrationEffect.createWaveform(new long[] {
 //                10L, 500L
 //        }, new int[] {
-//                200, 0
+//                230, 0
 //        }, 0));
     }
 
